@@ -63,7 +63,7 @@ function Products({ data, startIndex }) {
                 top: "0",
                 right: "0",
             }}>
-                <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-900'}`} style={{
+                <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-white'}`} style={{
                     position: "absolute",
                     top: "-0.5rem",
                     right: "0rem",

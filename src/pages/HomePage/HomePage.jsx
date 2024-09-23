@@ -124,7 +124,7 @@ function HomePage() {
       <div>
         <BannerSlider />
         <div className="block lg:hidden">
-          <div className="section-all-brand px-2 py-3 text-center gap-2 bg-yellow-100">
+          <div className="section-all-brand px-2 py-3 text-center gap-2 bg-green-100">
             <Link
               to="List-Product"
               className="no-underline text-900"

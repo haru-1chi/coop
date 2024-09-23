@@ -102,23 +102,23 @@ function AccountPage() {
 
     const StatusBar = () => (
         <ul className='navmenu w-full flex gap-4 overflow-scroll white-space-nowrap justify-content-between font-semibold p-0 px-4 m-0 text-center'>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'all' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'all' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                 onClick={() => setActiveOrderStatus('all')}>
                 ทั้งหมด {userOrders?.length}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'กำลังเตรียมจัดส่ง' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'กำลังเตรียมจัดส่ง' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                 onClick={() => setActiveOrderStatus('กำลังเตรียมจัดส่ง')}>
                 กำลังเตรียมจัดส่ง {statusCounts[statusEvents?.Packaged.key] || ''}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'จัดส่งแล้ว' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'จัดส่งแล้ว' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                 onClick={() => setActiveOrderStatus('จัดส่งแล้ว')}>
                 จัดส่งแล้ว {statusCounts[statusEvents.Delivering.key] || ''}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'รับสินค้าแล้ว' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'รับสินค้าแล้ว' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                 onClick={() => setActiveOrderStatus('รับสินค้าแล้ว')}>
                 รับสินค้าแล้ว {statusCounts[statusEvents.Received.key] || ''}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'ยกเลิกออเดอร์' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'ยกเลิกออเดอร์' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                 onClick={() => setActiveOrderStatus('ยกเลิกออเดอร์')}>
                 ยกเลิกออเดอร์ {statusCounts[statusEvents.Cancelled.key] || ''}
             </li>
@@ -298,7 +298,7 @@ function AccountPage() {
                         {tabs.map((tab) => (
                             <li
                                 key={tab.id}
-                                className={`list-none py-3 cursor-pointer ${activeTab === tab.id ? 'text-yellow-500' : ''}`}
+                                className={`list-none py-3 cursor-pointer ${activeTab === tab.id ? 'text-green-600' : ''}`}
                                 onClick={() => {
                                     setActiveTab(tab.id);
                                     if (tab.id === 'contactUs') {

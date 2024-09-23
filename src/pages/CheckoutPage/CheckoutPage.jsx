@@ -182,53 +182,45 @@ function CheckoutPage() {
     //^ map สินค้า
 
     //vตัวเลือกขนาดพัสดุ checkPoint2
-    // useEffect(() => {
-    //     Object.keys(deliverCompany).forEach(partnerId => {
-    //         Object.keys(deliverCompany[partnerId]).forEach(productId => {
-    //             const deliveryOptions = deliverCompany[partnerId][productId].options || [];
+    useEffect(() => {
+        const allPartners = Object.keys(groupByPartner);
 
-    //             // Set the first available delivery company as default if none is selected
-    //             if (deliveryOptions.length > 0 && !selectedDeliveryCompany?.[partnerId]?.[productId]) {
-    //                 setSelectedDeliveryCompany(prevState => ({
-    //                     ...prevState,
-    //                     [partnerId]: {
-    //                         ...prevState[partnerId],
-    //                         [productId]: {
-    //                             delivery_detail: deliveryOptions[0]
-    //                         }
-    //                     }
-    //                 }));
-    //             }
-    //         });
-    //     });
-    // }, [deliverCompany]); //always set default value is first option
+        allPartners.forEach((partnerId) => {
+            const partner = groupByPartner[partnerId]; // Get the partner object
+            const products = partner.products; // Access the products array from the partner object
 
-    // useEffect(() => {
-    //     const allPartners = Object.keys(groupByPartner);
+            products.forEach((product) => { // Now products is an array
+                const productId = product.product_id;
+                const packageOptions = product.product_package_options || [];
 
-    //     allPartners.forEach((partnerId) => {
-    //         const partner = groupByPartner[partnerId]; // Get the partner object
-    //         const products = partner.products; // Access the products array from the partner object
+                const filteredOptions = packageOptions.filter((option) => {
+                    // If there's only one package option, show it
+                    if (packageOptions.length === 1) {
+                        return true;
+                    }
+                    // Otherwise, filter based on product_qty match
+                    return (
+                        product.product_qty === option.package_qty ||
+                        packageOptions.every((po) => product.product_qty !== po.package_qty)
+                    );
+                });
 
-    //         products.forEach((product) => { // Now products is an array
-    //             const productId = product.product_id;
-    //             const packageOptions = product.product_package_options || [];
-
-    //             // If package options exist and none is selected yet for the product
-    //             if (packageOptions.length > 0 && !selectedPackageOptions?.[partnerId]?.[productId]) {
-    //                 setSelectedPackageOptions(prevState => ({
-    //                     ...prevState,
-    //                     [partnerId]: {
-    //                         ...prevState[partnerId],
-    //                         [productId]: {
-    //                             product_package_options: packageOptions[0] // Default to first package option
-    //                         }
-    //                     }
-    //                 }));
-    //             }
-    //         });
-    //     });
-    // }, [groupByPartner]);//always set default value is first option
+                // If package options exist and none is selected yet for the product
+                if (packageOptions.length > 0 && !selectedPackageOptions?.[partnerId]?.[productId]) {
+                    setSelectedPackageOptions(prevState => ({
+                        ...prevState,
+                        [partnerId]: {
+                            ...prevState[partnerId],
+                            [productId]: {
+                                // Select the first filtered option, or fallback to the first overall option
+                                product_package_options: filteredOptions.length > 0 ? filteredOptions[0] : packageOptions[0]
+                            }
+                        }
+                    }));
+                }
+            });
+        });
+    }, [groupByPartner]);//always set default value is first option
 
     const handlePackageChange = (partnerId, productId, packageOption) => {
         setSelectedPackageOptions(prevState => ({
@@ -297,13 +289,17 @@ function CheckoutPage() {
                     }
                 }));
 
-                setSelectedDeliveryCompany(prevState => ({
-                    ...prevState,
-                    [partner_id]: {
-                        ...prevState[partner_id],
-                        [productId]: deliveryOptions[0]  // Select the first option by default
-                    }
-                }));
+                if (deliveryOptions.length > 0) {
+                    setSelectedDeliveryCompany(prevState => ({
+                        ...prevState,
+                        [partner_id]: {
+                            ...prevState[partner_id],
+                            [productId]: {
+                                delivery_detail: deliveryOptions[0]
+                            }
+                        }
+                    }));
+                }
             } else {
                 setError(response.data.message || "Order failed");
             }
@@ -500,11 +496,16 @@ function CheckoutPage() {
                                                                 <label className="col text-xs font-medium text-gray-700 text-center">ความยาวของกล่อง(ซม.)</label>
                                                                 <label className="col text-xs font-medium text-gray-700 text-center">ความสูงของกล่อง(ซม.)</label>
                                                             </div>
-                                                            {product.product_package_options.filter((option) =>
-                                                                product.product_qty === option.package_qty ||
-                                                                product.product_package_options
-                                                                    .every((po) => product.product_qty !== po.package_qty)
-                                                            )
+                                                            {product.product_package_options
+                                                                .filter((option) => {
+                                                                    if (product.product_package_options.length === 1) {
+                                                                        return true;
+                                                                    }
+                                                                    return (
+                                                                        product.product_qty === option.package_qty ||
+                                                                        product.product_package_options.every((po) => product.product_qty !== po.package_qty)
+                                                                    );
+                                                                })
                                                                 .map((option) => (
                                                                     <div key={option._id} className="flex align-items-center p-2 border-1 surface-border border-round mb-2">
                                                                         <RadioButton
@@ -535,7 +536,7 @@ function CheckoutPage() {
                                                         <div>
                                                             <p className="p-0 m-0">กรุณาเลือกขนส่ง</p>
                                                             <DataTable value={deliverCompany?.[partner_id]?.[product.product_id]?.options} tableStyle={{ minWidth: '50rem' }}>
-                                                                <Column body={(rowData) => radioButtonTemplate(partner_id, product.product_id, rowData)} header="ตัวเลือก" style={{ width: '3rem' }} />
+                                                                <Column body={(rowData) => radioButtonTemplate(partner_id, product.product_id, rowData)} header="ตัวเลือก" style={{ width: '6rem' }} />
                                                                 {columns.map((col, i) => (
                                                                     <Column key={col.field} field={col.field} header={col.header} />
                                                                 ))}

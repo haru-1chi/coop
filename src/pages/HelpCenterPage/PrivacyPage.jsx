@@ -42,7 +42,7 @@ function PrivacyPage() {
                         {tabs.map((tab) => (
                             <li
                                 key={tab.id}
-                                className={`list-none cursor-pointer py-3 border-bottom-1 surface-border ${activeTab === tab.id ? 'text-yellow-500' : ''}`}
+                                className={`list-none cursor-pointer py-3 border-bottom-1 surface-border ${activeTab === tab.id ? 'text-green-600' : ''}`}
                                 onClick={() => {
                                     setActiveTab(tab.id);
                                 }}

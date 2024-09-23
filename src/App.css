@@ -46,7 +46,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: #fff7d4;
+  background: #f5ffee;
   font-family: "noto Sans Thai", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -217,7 +217,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 5;
-  background-color: #FECE00;
+  background-color: #347928;
   max-width: 100%;
   display: flex;
   flex-direction: column;
@@ -311,7 +311,7 @@ body {
 
 .navmenu button span {
   border: 0;
-  color: black;
+  color: #fece00;
   font-size: 15px;
   font-weight: 400;
 }

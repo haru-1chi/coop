@@ -103,19 +103,19 @@ function ShopCategriesSelected() {
             <Toast ref={toast} position="top-center" />
             <div className="flex-grow">
             <ul className='section-sortbar bg-white flex justify-content-between list-none m-0 px-5 py-0 gap-5 border-bottom-1 surface-border'>
-                <li className={`py-2 list-none cursor-pointer ${activeTab === 'popular' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+                <li className={`py-2 list-none cursor-pointer ${activeTab === 'popular' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                     onClick={() => setActiveTab('popular')}>
                     ยอดนิยม
                 </li>
-                <li className={`py-2 list-none cursor-pointer ${activeTab === 'new' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+                <li className={`py-2 list-none cursor-pointer ${activeTab === 'new' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                     onClick={() => setActiveTab('new')}>
                     ใหม่
                 </li>
-                <li className={`py-2 list-none cursor-pointer ${activeTab === 'topSales' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+                <li className={`py-2 list-none cursor-pointer ${activeTab === 'topSales' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                     onClick={() => setActiveTab('topSales')}>
                     สินค้าขายดี
                 </li>
-                <li className={`py-2 list-none cursor-pointer ${activeTab === 'price' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+                <li className={`py-2 list-none cursor-pointer ${activeTab === 'price' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
                     onClick={() => {
                         setActiveTab('price');
                         setPriceSortOrder((prevOrder) => prevOrder === 'asc' ? 'desc' : 'asc');

@@ -87,7 +87,7 @@ function ShopPage() {
           {tabs.map((tab) => (
             <li
               key={tab.id}
-              className={`list-none py-2 cursor-pointer ${activeTab === tab.id ? 'border-bottom-3 border-yellow-500 text-yellow-500' : ''}`}
+              className={`list-none py-2 cursor-pointer ${activeTab === tab.id ? 'border-bottom-3 border-green-600 text-green-600' : ''}`}
               onClick={() => {
                 setActiveTab(tab.id);
               }}
