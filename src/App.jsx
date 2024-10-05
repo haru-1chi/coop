@@ -38,7 +38,7 @@ function App() {
     function getTokenFromURL() {
       // const urlParams = new URLSearchParams(window.location.search);
       // return urlParams.get('token');
-      return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjIwOGE4NTc0MzEzNjJkMmZlZDhmOWYiLCJyb3ciOiJtZW1iZXIiLCJ0ZWwiOiIwOTA5NTAwNzA5IiwiaWF0IjoxNzI3MDU3MDIwLCJleHAiOjE3MjcwNzg2MjB9.BURxt99zu-CA78THF5Ene9Pmh9IwXBSBrwwqzujDBFQ'
+      return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjIwOGE4NTc0MzEzNjJkMmZlZDhmOWYiLCJyb3ciOiJtZW1iZXIiLCJ0ZWwiOiIwOTA5NTAwNzA5IiwiaWF0IjoxNzI4MTAwNjA2LCJleHAiOjE3MjgxMjIyMDZ9.tXuBzNDYUrtGdC5xzhcplYygz2PlVrRwoAuam3FQibA"
     }
 
 
@@ -46,7 +46,8 @@ function App() {
       if (decodedToken && decodedToken.exp) {
         const now = Math.floor(Date.now() / 1000);
         if (decodedToken.exp < now) {
-          localStorage.removeItem('userToken');
+          localStorage.removeItem('token');
+          localStorage.removeItem('existingToken');
           return true;
         }
       }
@@ -55,7 +56,6 @@ function App() {
 
     const token = getTokenFromURL();
     const existingToken = localStorage.getItem("token");
-
     const seededUserAddress = [
       {
         _id: 1,
@@ -86,7 +86,6 @@ function App() {
     if (token) {
       const decodedToken = decodeToken(token);
       decodedToken.user_address = seededUserAddress;
-
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(decodedToken));
 
@@ -107,18 +106,18 @@ function App() {
       setTokenValid(false);
     }
 
-    // if (!token && !existingToken) {
-    //   let countdown = 5;
-    //   const timer = setInterval(() => {
-    //     console.log(`Redirecting to login in ${countdown} seconds...`);
-    //     countdown--;
-    //     if (countdown === 0) {
-    //       clearInterval(timer);
-    //       alert('กรุณาเข้าสู่ระบบจาก https://service.tossaguns.com/ เพื่อใช้งาน E-Market');
-    //       window.location.href = 'https://service.tossaguns.com/';
-    //     }
-    //   }, 1000);
-    // }
+    if (!token && !existingToken) {
+      let countdown = 5;
+      const timer = setInterval(() => {
+        console.log(`Redirecting to login in ${countdown} seconds...`);
+        countdown--;
+        if (countdown === 0) {
+          clearInterval(timer);
+          alert(`กรุณาเข้าสู่ระบบจาก ${import.meta.env.VITE_APP_API_URL} เพื่อใช้งาน E-Market`);
+          window.location.href = import.meta.env.VITE_APP_API_URL;
+        }
+      }, 1000);
+    }
   }, []);
 
   return (

@@ -15,21 +15,21 @@ function Products({ data, startIndex }) {
 
     useEffect(() => {
         const updateFlex = () => {
-          const width = window.innerWidth;
-          if (width <= 1199) {
-            setItemFlex('0 0 25%');
-          } else if (width <= 1400) {
-            setItemFlex('0 0 25%');
-          } else {
-            setItemFlex('0 0 20%');
-          }
+            const width = window.innerWidth;
+            if (width <= 1199) {
+                setItemFlex('0 0 25%');
+            } else if (width <= 1400) {
+                setItemFlex('0 0 25%');
+            } else {
+                setItemFlex('0 0 20%');
+            }
         };
-    
+
         window.addEventListener('resize', updateFlex);
         updateFlex();
-    
+
         return () => window.removeEventListener('resize', updateFlex);
-      }, []);
+    }, []);
 
     const showSuccessToast = () => {
         toast.current.show({
@@ -47,7 +47,7 @@ function Products({ data, startIndex }) {
         const token = localStorage.getItem("token");
         if (!token) {
             showWarningToast();
-            window.location.href = 'https://service.tossaguns.com/'
+            window.location.href = import.meta.env.VITE_APP_API_URL;
         } else {
             addToCart(product)
             showSuccessToast();
@@ -63,11 +63,11 @@ function Products({ data, startIndex }) {
                 top: "0",
                 right: "0",
             }}>
-                <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-white'}`} style={{
+                <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-900'}`} style={{
                     position: "absolute",
                     top: "-0.5rem",
                     right: "0rem",
-                    zIndex: "5"
+                    zIndex: "3"
                 }}>{product.product_provider === 'coop' ? 'สินค้าสหกรณ์' : 'สินค้าทั่วไป'}</p>
                 <div className="align-items-center justify-content-center">
                     <Link to={`/List-Product/product/${product._id}`} state={{ product }}>
@@ -150,7 +150,7 @@ function Products({ data, startIndex }) {
                     itemTemplate={productTemplate}
                     pt={{
                         item: { style: { flex: itemFlex } },
-                      }}
+                    }}
                 />
 
             </div>

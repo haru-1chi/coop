@@ -31,10 +31,12 @@ function ListProductsPage() {
   const [visibleSort, setVisibleSort] = useState(false);
   const toast = useRef(null);
   const categoriesLocation = location.state?.categoryName ? location.state.categoryName : [];
+  const providersLocation = location.state?.providerName ? location.state.providerName : [];
   const defaultFilters = {
     priceRanges: { key: 'allRange', value: 'All' },
     selectedProviders: [],
-    selectedCategories: []
+    selectedCategories: [],
+    selectedSubCategories: []
   };
   const [filters, setFilters] = useState(defaultFilters);
   const [sortOption, setSortOption] = useState('default');
@@ -53,15 +55,17 @@ function ListProductsPage() {
     });
   };
 
-  const filterProducts = (products, searchTerm,categoryName) => {
+  const filterProducts = (products, searchTerm, categoryName, providerName) => {
     return products.filter((product) => {
       if (searchTerm) {
         return product.product_name.toLowerCase().includes(searchTerm.toLowerCase());
       }
-      // else if (categoryName) {
-      //   return product.product_category.includes(categoryName);
-      // }
-      
+      else if (categoryName) {
+        return product.product_category.includes(categoryName);
+      }
+      else if (providerName) {
+        return product.product_provider.includes(providerName);
+      }
       return true;
     });
   };
@@ -95,7 +99,13 @@ function ListProductsPage() {
 
 
   const applyFilters = useCallback((filters) => {
-    let filtered = data;
+    let filtered;
+
+    if (searchTerm) {
+      filtered = filteredData;
+    } else {
+      filtered = data;
+    }
 
     if (filters.priceRanges.key !== 'allRange') {
       filtered = filtered.filter(product => product.product_price >= filters.priceRanges.min && product.product_price <= filters.priceRanges.max);
@@ -105,8 +115,14 @@ function ListProductsPage() {
       filtered = filtered.filter(product => filters.selectedProviders.includes(product.product_provider));
     }
 
-    if (filters.selectedCategories.length > 0) {
-      filtered = filtered.filter(product => filters.selectedCategories.includes(product.product_category));
+    if (filters.selectedCategories.length > 0 || filters.selectedSubCategories.length > 0) {
+      filtered = filtered.filter(product => {
+        const categoryMatch = filters.selectedCategories.includes(product.product_category);
+        const subcategoryMatch = product.product_subcategory.some(subcategory =>
+          filters.selectedSubCategories.includes(subcategory)
+        );
+        return categoryMatch || subcategoryMatch;
+      });
     }
 
     filtered = sortProducts(filtered, sortOption);
@@ -133,9 +149,9 @@ function ListProductsPage() {
       url: `${apiProductUrl}/product`
     })
       .then((response) => {
-        const filtered = filterProducts(response.data.data, searchTerm, location.state?.categoryName);
+        const filtered = filterProducts(response.data.data, searchTerm, location.state?.categoryName, location.state?.providerName);
         // const filtered = filterProducts(response.data.data, searchTerm);
-        setData(filtered);
+        setData(response.data.data);
         setFilteredData(filtered);
         setPaginatedData(filtered.slice(first, first + rows));
       })
@@ -149,22 +165,26 @@ function ListProductsPage() {
 
   useEffect(() => {
     fetchData();
-  }, [apiProductUrl, searchTerm, location.state?.categoryName, first, rows]);
-// }, [apiProductUrl, searchTerm, first, rows]);
+    // }, [apiProductUrl, searchTerm, location.state?.categoryName, location.state?.providerName, first, rows]);
+  }, [apiProductUrl, searchTerm, first, rows]);
 
   useEffect(() => {
     const categoryName = location.state?.categoryName;
+    const providerName = location.state?.providerName;
     const updatedFilters = {
       ...filters,
       selectedCategories: categoryName
         ? [...new Set([categoryName, ...filters.selectedCategories])]
         : filters.selectedCategories,
+      selectedProviders: providerName
+        ? [...new Set([providerName, ...filters.selectedProviders])]
+        : filters.selectedProviders,
     };
     if (JSON.stringify(updatedFilters) !== JSON.stringify(filters)) {
       setFilters(updatedFilters);
     }
     applyFilters(updatedFilters);
-  }, [location.state?.categoryName, applyFilters, filters]);
+  }, [location.state?.categoryName, location.state?.providerName, applyFilters, filters]);
 
   useEffect(() => {
     setPaginatedData(filteredData.slice(first, first + rows));
@@ -180,7 +200,7 @@ function ListProductsPage() {
     const token = localStorage.getItem("token");
     if (!token) {
       showWarningToast();
-      window.location.href = 'https://service.tossaguns.com/'
+      window.location.href = import.meta.env.VITE_APP_API_URL;
     } else {
       addToCart(product)
       showSuccessToast();
@@ -216,19 +236,19 @@ function ListProductsPage() {
     <>
       <Toast ref={toast} position="top-center" />
       <ul className='section-sortbar bg-white flex justify-content-between list-none m-0 px-5 py-0 gap-5 border-bottom-1 surface-border'>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'popular' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+        <li className={`py-2 list-none cursor-pointer ${activeTab === 'popular' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
           onClick={() => setActiveTab('popular')}>
           ยอดนิยม
         </li>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'new' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+        <li className={`py-2 list-none cursor-pointer ${activeTab === 'new' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
           onClick={() => setActiveTab('new')}>
           ใหม่
         </li>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'topSales' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+        <li className={`py-2 list-none cursor-pointer ${activeTab === 'topSales' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
           onClick={() => setActiveTab('topSales')}>
           สินค้าขายดี
         </li>
-        <li className={`py-2 list-none cursor-pointer ${activeTab === 'price' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+        <li className={`py-2 list-none cursor-pointer ${activeTab === 'price' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
           onClick={() => {
             setActiveTab('price');
             setPriceSortOrder((prevOrder) => prevOrder === 'asc' ? 'desc' : 'asc');
@@ -238,8 +258,8 @@ function ListProductsPage() {
         </li>
       </ul>
       <div className="p-3">
-        {/* <div className="flex justify-content-between">
-          <div className="w-full flex justify-content-between align-items-center">
+        <div className="flex justify-content-end mb-2 md:mb-0">
+          {/* <div className="w-full flex justify-content-between align-items-center">
             <h1 className="font-semibold">รายการสินค้า</h1>
             <div className="hidden lg:block">
               <div className="flex gap-2">
@@ -248,23 +268,23 @@ function ListProductsPage() {
                   setVisibleSort={setVisibleSort} />
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="lg:hidden flex">
-            <Button
+            {/* <Button
               className="px-2"
               onClick={() => setVisibleSort(true)}
               label="เรียง" icon="pi pi-sort-alt"
               text
-            />
+            /> */}
             <Button
-              className="px-2"
+              className="py-1 px-2"
               onClick={() => setVisible(true)}
               label="กรอง" icon="pi pi-sliders-h"
-              text
+
             />
           </div>
 
-        </div> */}
+        </div>
         <div className="panel w-full flex">
           <div className="hidden lg:block mr-3">
             {data.length > 0 && (
@@ -275,6 +295,7 @@ function ListProductsPage() {
                 setVisible={setVisible}
                 initialFilters={filters}
                 categoriesLocation={categoriesLocation}
+                providersLocation={providersLocation}
               />
             )}
           </div>
@@ -299,7 +320,7 @@ function ListProductsPage() {
                                 alt={product.product_name}
                                 className="w-12 border-1 surface-border"
                               />
-                              <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-white'}`} style={{
+                              <p className={`w-fit border-noround-top border-noround-right mt-2 px-2 border-round-md font-normal ${product.product_provider === 'coop' ? 'bg-green-600 text-white' : 'bg-primary-400 text-900'}`} style={{
                                 position: "absolute",
                                 top: "-0.5rem",
                                 right: "0rem"

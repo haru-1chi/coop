@@ -75,6 +75,8 @@ function AccountPage() {
 
             const orderStatus = Object.values(statusEvents).find(status => status.value === latestStatusDetail.status);
             switch (activeOrderStatus) {
+                case 'รอชำระเงิน':
+                    return orderStatus?.key === statusEvents.Pending?.key;
                 case 'กำลังเตรียมจัดส่ง':
                     return orderStatus?.key === statusEvents.Packaged?.key;
                 case 'จัดส่งแล้ว':
@@ -102,23 +104,27 @@ function AccountPage() {
 
     const StatusBar = () => (
         <ul className='navmenu w-full flex gap-4 overflow-scroll white-space-nowrap justify-content-between font-semibold p-0 px-4 m-0 text-center'>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'all' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'all' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
                 onClick={() => setActiveOrderStatus('all')}>
                 ทั้งหมด {userOrders?.length}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'กำลังเตรียมจัดส่ง' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'รอชำระเงิน' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
+                onClick={() => setActiveOrderStatus('รอชำระเงิน')}>
+                รอชำระเงิน {statusCounts[statusEvents?.Pending.key] || ''}
+            </li>
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'กำลังเตรียมจัดส่ง' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
                 onClick={() => setActiveOrderStatus('กำลังเตรียมจัดส่ง')}>
                 กำลังเตรียมจัดส่ง {statusCounts[statusEvents?.Packaged.key] || ''}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'จัดส่งแล้ว' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'จัดส่งแล้ว' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
                 onClick={() => setActiveOrderStatus('จัดส่งแล้ว')}>
                 จัดส่งแล้ว {statusCounts[statusEvents.Delivering.key] || ''}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'รับสินค้าแล้ว' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'รับสินค้าแล้ว' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
                 onClick={() => setActiveOrderStatus('รับสินค้าแล้ว')}>
                 รับสินค้าแล้ว {statusCounts[statusEvents.Received.key] || ''}
             </li>
-            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'ยกเลิกออเดอร์' ? 'border-bottom-3  border-green-600 text-green-600' : ''}`}
+            <li className={`py-2 list-none cursor-pointer ${activeOrderStatus === 'ยกเลิกออเดอร์' ? 'border-bottom-3  border-yellow-500 text-yellow-500' : ''}`}
                 onClick={() => setActiveOrderStatus('ยกเลิกออเดอร์')}>
                 ยกเลิกออเดอร์ {statusCounts[statusEvents.Cancelled.key] || ''}
             </li>
@@ -216,8 +222,17 @@ function AccountPage() {
                     <div className='w-full flex justify-content-end'>
                         <p className="mt-2 p-0 text-sm"><i className='pi pi-shopping-cart mr-1'></i>วันที่สั่งซื้อ: {formatDate(order.createdAt)} น.</p>
                     </div>
-                    <div className=''>
-                        <p className="m-0 p-0 text-right font-semibold text-900 text-l">รวมการสั่งซื้อ: ฿{order.totalproduct?.toLocaleString('en-US')}</p>
+                    <div className="flex align-items-center justify-content-end pb-2 mt-2 md:mt-0">
+                        <p className="m-0 p-0 mr-2">รวมค่าสินค้าทั้งหมด:</p>
+                        <p className="m-0 p-0 pr-2 font-semibold text-900">฿{order.totalproduct?.toLocaleString('en-US')}</p>
+                    </div>
+                    <div className="flex align-items-center justify-content-end pb-2 mt-2 md:mt-0">
+                        <p className="m-0 p-0 mr-2">รวมค่าส่งทั้งหมด:</p>
+                        <p className="m-0 p-0 pr-2 font-semibold text-900">฿{order.totaldeliveryPrice?.toLocaleString('en-US')}</p>
+                    </div>
+                    <div className="flex align-items-center justify-content-end pb-2 mt-2 md:mt-0">
+                        <p className="m-0 p-0 mr-2">รวมคำสั่งซื้อ:</p>
+                        <p className="m-0 p-0 pr-2 font-semibold text-900">฿{order.alltotal?.toLocaleString('en-US')}</p>
                     </div>
                     <div className='w-full flex justify-content-end'>
                         {latestStatus === 'จัดส่งแล้ว' ? <Button label='ฉันได้รับสินค้าแล้ว' /> : ("")}
@@ -242,7 +257,7 @@ function AccountPage() {
                                 <div key={index} className="cart-items flex justify-content-between align-items-center pb-1">
                                     <div className="w-full flex">
                                         <img
-                                            src={product.product_image ? apiProductUrl + product.product_image : img_placeholder}
+                                            src={`${product.product_image ? apiProductUrl + product.product_image : product.product_subimage1 ? apiProductUrl + product.product_subimage1 : product.product_subimage2 ? apiProductUrl + product.product_subimage2 : product.product_subimage3 ? apiProductUrl + product.product_subimage3 : img_placeholder}`}
                                             alt={product.product_name}
                                             width={90}
                                             height={90}
@@ -260,9 +275,17 @@ function AccountPage() {
                             ))}
                         </div>
                     </div>
-                    <div className='w-full flex justify-content-end'>
+                    <div className='w-full flex justify-content-end align-items-center'>
                         <p className="m-0 p-0 text-right">สินค้ารวม {order?.product?.length} รายการ: </p>
                         <p className="m-0 ml-1 p-0 text-right font-semibold">฿{order.totalproduct?.toLocaleString('en-US')}</p>
+                    </div>
+                    <div className='w-full flex justify-content-end align-items-center'>
+                        <p className="my-1 p-0 text-right text-900 text-l">รวมค่าส่งทั้งหมด:</p>
+                        <p className="m-0 ml-1 p-0 text-right font-semibold">฿{order.totaldeliveryPrice?.toLocaleString('en-US')}</p>
+                    </div>
+                    <div className='w-full flex justify-content-end align-items-center'>
+                        <p className="my-1 p-0 text-right text-900 text-l">รวมการสั่งซื้อ:</p>
+                        <p className="m-0 ml-1 p-0 text-right font-semibold">฿{order.alltotal?.toLocaleString('en-US')}</p>
                     </div>
                     <div className='w-full flex justify-content-end'>
                         {latestStatus === 'จัดส่งแล้ว' ? <Button label='ฉันได้รับสินค้าแล้ว' /> : ("")}
@@ -298,7 +321,7 @@ function AccountPage() {
                         {tabs.map((tab) => (
                             <li
                                 key={tab.id}
-                                className={`list-none py-3 cursor-pointer ${activeTab === tab.id ? 'text-green-600' : ''}`}
+                                className={`list-none py-3 cursor-pointer ${activeTab === tab.id ? 'text-yellow-500' : ''}`}
                                 onClick={() => {
                                     setActiveTab(tab.id);
                                     if (tab.id === 'contactUs') {

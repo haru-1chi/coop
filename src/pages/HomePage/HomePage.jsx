@@ -12,19 +12,21 @@ import axios from "axios";
 
 function HomePage() {
   const [categories, setCategories] = useState([]);
-
+  const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
   useEffect(() => {
-    const fetchCategories = () => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/product/tossagun/category/all`);
+        const dataWithImages = response.data.data.map((category) => ({
+          ...category,
+          icon: CategoriesIcon[category.name] || "default-image-url.png",
+        }));
 
-      const fetchedCategories = Object.keys(CategoriesIcon).map((categoryName, index) => ({
-        key: index,
-        name: categoryName,
-        icon: CategoriesIcon[categoryName]
-      }));
-
-      setCategories(fetchedCategories);
+        setCategories(dataWithImages);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     };
-
     fetchCategories();
   }, []);
 
@@ -74,7 +76,7 @@ function HomePage() {
   ];
 
 
-  const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
+
   const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
 
   const [data, setData] = useState([]);
@@ -124,7 +126,7 @@ function HomePage() {
       <div>
         <BannerSlider />
         <div className="block lg:hidden">
-          <div className="section-all-brand px-2 py-3 text-center gap-2 bg-green-100">
+          <div className="section-all-brand px-2 py-3 text-center gap-2 bg-yellow-100">
             <Link
               to="List-Product"
               className="no-underline text-900"
@@ -158,7 +160,7 @@ function HomePage() {
           </div>
           <div className="my-2 mx-3 md:mx-6 flex justify-content-between">
             <h2 className="m-0">สินค้าทั่วไป</h2>
-            <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: ['normal'] } })}>
+            <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: 'normal' } })}>
               <p className="m-0">ดูเพิ่มเติม</p><i className="pi pi-chevron-right"></i>
             </div>
           </div>
@@ -186,7 +188,7 @@ function HomePage() {
           </div>
           <div className="my-2 mx-3 md:mx-6 flex justify-content-between">
             <h2 className="m-0">สินค้าสหกรณ์</h2>
-            <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: ['coop'] } })}>
+            <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: 'coop' } })}>
               <p className="m-0">ดูเพิ่มเติม</p><i className="pi pi-chevron-right"></i>
             </div>
           </div>

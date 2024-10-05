@@ -80,20 +80,20 @@ function ShopListProduct({ partner_id }) {
         const token = localStorage.getItem("token");
         if (!token) {
             showWarningToast();
-            window.location.href = 'https://service.tossaguns.com/'
+            window.location.href = import.meta.env.VITE_APP_API_URL;
         } else {
             addToCart(product)
             showSuccessToast();
         }
     };
-    
+
     return (
         <div>
             <Toast ref={toast} position="top-center" />
             <ul className="section-sortbar-2 bg-white flex list-none m-0 px-3 py-0 gap-5 border-bottom-1 surface-border">
                 <li
                     className={`py-2 list-none cursor-pointer ${activeTab === "popular"
-                        ? "border-bottom-3  border-green-600 text-green-600"
+                        ? "border-bottom-3  border-yellow-500 text-yellow-500"
                         : ""
                         }`}
                     onClick={() => setActiveTab("popular")}
@@ -102,7 +102,7 @@ function ShopListProduct({ partner_id }) {
                 </li>
                 <li
                     className={`py-2 list-none cursor-pointer ${activeTab === "new"
-                        ? "border-bottom-3  border-green-600 text-green-600"
+                        ? "border-bottom-3  border-yellow-500 text-yellow-500"
                         : ""
                         }`}
                     onClick={() => setActiveTab("new")}
@@ -111,7 +111,7 @@ function ShopListProduct({ partner_id }) {
                 </li>
                 <li
                     className={`py-2 list-none cursor-pointer ${activeTab === "topSales"
-                        ? "border-bottom-3  border-green-600 text-green-600"
+                        ? "border-bottom-3  border-yellow-500 text-yellow-500"
                         : ""
                         }`}
                     onClick={() => setActiveTab("topSales")}
@@ -120,7 +120,7 @@ function ShopListProduct({ partner_id }) {
                 </li>
                 <li
                     className={`py-2 list-none cursor-pointer ${activeTab === "price"
-                        ? "border-bottom-3  border-green-600 text-green-600"
+                        ? "border-bottom-3  border-yellow-500 text-yellow-500"
                         : ""
                         }`}
                     onClick={() => {

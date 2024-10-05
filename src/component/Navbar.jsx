@@ -39,17 +39,19 @@ function Navbar() {
   );
 
   useEffect(() => {
-    const fetchCategories = () => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/product/tossagun/category/all`);
+        const dataWithImages = response.data.data.map((category) => ({
+          ...category,
+          icon: CategoriesIcon[category.name] || "default-image-url.png",
+        }));
 
-      const fetchedCategories = Object.keys(CategoriesIcon).map((categoryName, index) => ({
-        key: index,
-        name: categoryName,
-        icon: CategoriesIcon[categoryName]
-      }));
-
-      setCategories(fetchedCategories);
+        setCategories(dataWithImages);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     };
-
     fetchCategories();
   }, []);
 
@@ -134,8 +136,8 @@ function Navbar() {
         >
           <div className="px-3">
             <div className="flex justify-content-between pt-2 pb-4">
-              <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = 'https://service.tossaguns.com/'} />
-              <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = 'https://service.tossaguns.com/'} />
+              <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
+              <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
             </div>
             <div>
               <Button

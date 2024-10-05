@@ -10,7 +10,8 @@ import { InputText } from "primereact/inputtext";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Badge } from "primereact/badge";
 import { Menu } from "primereact/menu";
-
+import { Dialog } from "primereact/dialog";
+import { RadioButton } from 'primereact/radiobutton';
 //
 import LanguageSelector from "./LanguageSelector";
 import { useTranslation } from "react-i18next";
@@ -55,6 +56,7 @@ function Appbar() {
   const [visible2, setVisible2] = useState(false);
   const [visible3, setVisible3] = useState(false);
   const [visible4, setVisible4] = useState(false);
+  const [visible5, setVisible5] = useState(false);
 
   const { cart, updateQuantity, removeFromCart, resetCart, selectedItemsCart, setSelectedItemsCart } = useCart();
   const toast = useRef(null);
@@ -146,7 +148,6 @@ function Appbar() {
     setSelectedItemsCart(selectedItems);
     navigate("/CheckoutPage");
   };
-
   const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
   const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
   const [user, setUser] = useState(null);
@@ -181,6 +182,7 @@ function Appbar() {
         const res = await axios.post(`${apiUrl}/me`, null, {
           headers: { "auth-token": token }
         });
+        console.log(res)
         setUser(res.data.data);
       } catch (err) {
         console.error(
@@ -192,18 +194,35 @@ function Appbar() {
     getUserProfile();
   }, [apiUrl]);
 
+  // useEffect(() => {
+  //   const fetchCategories = () => {
+
+  //     const fetchedCategories = Object.keys(CategoriesIcon).map((categoryName, index) => ({
+  //       key: index,
+  //       name: categoryName,
+  //       icon: CategoriesIcon[categoryName]
+  //     }));
+
+  //     setCategories(fetchedCategories);
+  //   };
+
+  //   fetchCategories();
+  // }, []);
+
   useEffect(() => {
-    const fetchCategories = () => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/product/tossagun/category/all`);
+        const dataWithImages = response.data.data.map((category) => ({
+          ...category,
+          icon: CategoriesIcon[category.name] || "default-image-url.png",
+        }));
 
-      const fetchedCategories = Object.keys(CategoriesIcon).map((categoryName, index) => ({
-        key: index,
-        name: categoryName,
-        icon: CategoriesIcon[categoryName]
-      }));
-
-      setCategories(fetchedCategories);
+        setCategories(dataWithImages);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     };
-
     fetchCategories();
   }, []);
 
@@ -252,16 +271,80 @@ function Appbar() {
     localStorage.removeItem("user_id");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = 'https://service.tossaguns.com/';
+    window.location.href = 'https://service.tossaguns.online/';
   };
+
+
 
   return (
     <>
+      <Dialog
+        header={<h3 className="font-semibold m-0">เลือกโค้ดส่วนลด</h3>}
+        visible={visible5}
+        style={{ width: "500px" }}
+        onHide={() => setVisible5(false)}
+        closable={false}
+      >
+        <div className='flex justify-content-between align-items-center pt-3'>
+          <label>เพิ่มโค้ด</label>
+          <InputText id="label" className='w-15rem md:w-17rem p-2' placeholder='เพิ่มโค้ดส่วนลด' />
+          <Button className="px-2 md:px-4 py-2" onClick={() => setVisible5(false)} label='ใช้โค้ด' />
+        </div>
+
+        <div className="flex flex-column gap-4 mt-2">
+          <div className='w-full gap-3'>
+            <p className="my-2">โค้ดค่าส่งขนละครึ่ง</p>
+            <div className="flex border-1 surface-border mb-2">
+              <div className="w-10rem bg-primary-500 flex flex-column justify-content-center align-items-center text-white">
+                <i className="pi pi-truck" style={{ fontSize: '1.5rem' }}></i>
+                <p className="m-0">ค่าส่งคนละครึ่ง</p>
+              </div>
+              <div className="w-full flex justify-content-between p-3">
+                <div className="flex flex-column justify-content-center">
+                  <p className="m-0">ค่าส่งคนละครึ่ง</p>
+                  <p className="m-0">ขั้นต่ำ ฿119</p>
+                  <p className="m-0">ใกล้หมดอายุ: เหลือ 1 วัน</p>
+                </div>
+                <div className="flex align-items-center">
+                  <RadioButton />
+                </div>
+              </div>
+            </div>
+            <div className="flex border-1 surface-border">
+              <div className="w-10rem bg-primary-500 flex flex-column justify-content-center align-items-center text-white">
+                <i className="pi pi-truck" style={{ fontSize: '1.5rem' }}></i>
+                <p className="m-0">ค่าส่งคนละครึ่ง</p>
+              </div>
+              <div className="w-full flex justify-content-between p-3">
+                <div className="flex flex-column justify-content-center">
+                  <p className="m-0">ค่าส่งคนละครึ่ง</p>
+                  <p className="m-0">ขั้นต่ำ ฿49</p>
+                  <p className="m-0">ใช้ได้ก่อน 01.01.2025</p>
+                </div>
+                <div className="flex align-items-center">
+                  <RadioButton />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div className='flex justify-content-end gap-3 mt-4'>
+          <Button onClick={() => setVisible5(false)} label='ยกเลิก' outlined />
+          <Button label='ยืนยัน' onClick={() => setVisible5(false)}/>
+        </div>
+      </Dialog>
+
       <Toast ref={toast} position="top-center" />
       <div className="hidden lg:block section-appbar">
         <div className="pt-3 pr-3 pl-3">
-          <div className="flex justify-content-end mb-2 text-yellow-400">
-            <a className="px-2 border-right-1 cursor-pointer" onClick={() => navigate("/HelpCenterPage", { state: { activeTab: "SellerCenter" } })}>Seller Center</a>
+          <div className="flex justify-content-end mb-2">
+            {/* ----- [ Production ] ----- */}
+            <a className="px-2 border-right-1 cursor-pointer" onClick={() => window.open('https://partner.ddscservices.com/', '_blank')}>Seller Center</a>
+
+            {/* ----- [ Develop ] ----- */}
+            <a className="px-2 border-right-1 cursor-pointer" onClick={() => window.open('http://partner.nbadigitalsuccessmore.com/', '_blank')}>Seller Center</a>
+
             <a className="px-2 border-right-1 cursor-pointer" onClick={() => navigate("/HelpCenterPage", { state: { activeTab: "contactChannel" } })}>ช่องทางการติดต่อ</a>
             <a className="px-2 cursor-pointer" onClick={() => navigate("/HelpCenterPage", { state: { activeTab: "contactUs" } })}>ติดตามเรา</a>
             {/* <LanguageSelector /> */}
@@ -347,7 +430,7 @@ function Appbar() {
                         <div className="flex flex-wrap justify-content-center">
                           <div className="border-circle w-4rem h-4rem m-2 bg-primary font-bold flex align-items-center justify-content-center">
 
-                            {user.fristname.charAt(0).toUpperCase()}
+                            {/* {user?.fristname.charAt(0).toUpperCase()} */}
                           </div>
                         </div>
                         <h4 className="ml-3">
@@ -366,10 +449,11 @@ function Appbar() {
                 </>
               ) : (
                 <Button
+                  style={{ background: '#fece00', color: '#000000' }}
                   icon="pi pi-user"
                   rounded
                   text
-                  onClick={() => window.location.href = 'https://service.tossaguns.com/'}
+                  onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL}
                 />
               )}
             </div>
@@ -420,7 +504,7 @@ function Appbar() {
       <div className="block lg:hidden section-appbar">
         {/* <Toast ref={toast} position="top-center" /> */}
         <div className="flex justify-content-end p-2 pb-0">
-          <a className="px-2 border-right-1 cursor-pointer" onClick={() => navigate("/HelpCenterPage", { state: { activeTab: "SellerCenter" } })}>Seller Center</a>
+          <a className="px-2 border-right-1 cursor-pointer" onClick={() => window.open('https://partner.ddscservices.com/', '_blank')}>Seller Center</a>
           <a className="px-2 border-right-1 cursor-pointer" onClick={() => navigate("/HelpCenterPage", { state: { activeTab: "contactChannel" } })}>ช่องทางการติดต่อ</a>
           <a className="px-2 cursor-pointer" onClick={() => navigate("/HelpCenterPage", { state: { activeTab: "contactUs" } })}>ติดตามเรา</a>
           {/* <LanguageSelector /> */}
@@ -477,6 +561,14 @@ function Appbar() {
                             <li className="flex flex-column text-center cursor-pointer"
                               onClick={() => {
                                 setVisible1(false);
+                                navigate("/AccountPage", { state: { activeTab: "orderHistory", activeOrderStatus: "รอชำระเงิน" } });
+                              }}>
+                              <i className="pi pi-wallet" style={{ fontSize: '1.5rem' }}></i>
+                              <p className="m-0 p-0 mt-2 text-sm">รอชำระเงิน</p>
+                            </li>
+                            <li className="flex flex-column text-center cursor-pointer"
+                              onClick={() => {
+                                setVisible1(false);
                                 navigate("/AccountPage", { state: { activeTab: "orderHistory", activeOrderStatus: "กำลังเตรียมจัดส่ง" } });
                               }}>
                               <i className="pi pi-box" style={{ fontSize: '1.5rem' }}></i>
@@ -489,14 +581,6 @@ function Appbar() {
                               }}>
                               <i className="pi pi-truck" style={{ fontSize: '1.5rem' }}></i>
                               <p className="m-0 p-0 mt-2 text-sm">ที่ต้องได้รับ</p>
-                            </li>
-                            <li className="flex flex-column text-center cursor-pointer"
-                              onClick={() => {
-                                setVisible1(false);
-                                navigate("/AccountPage", { state: { activeTab: "orderHistory", activeOrderStatus: "รับสินค้าแล้ว" } });
-                              }}>
-                              <i className="pi pi-check" style={{ fontSize: '1.5rem' }}></i>
-                              <p className="m-0 p-0 mt-2 text-sm">รับสินค้าแล้ว</p>
                             </li>
                             <li className="flex flex-column text-center cursor-pointer"
                               onClick={() => {
@@ -546,8 +630,8 @@ function Appbar() {
                     ) : (
                       <div className="px-3">
                         <div className="flex justify-content-between pt-2 pb-4">
-                          <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = 'https://service.tossaguns.com/'} />
-                          <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = 'https://service.tossaguns.com/'} />
+                          <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
+                          <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
                         </div>
                         <div>
                           <Button
@@ -699,19 +783,26 @@ function Appbar() {
                         ))}
                         <div>
                           <div className="flex align-items-center border-bottom-1 surface-border justify-content-between py-2">
+                            <p className="m-0">โค้ดส่วนลด</p>
+                            <div className="flex align-items-center cursor-pointer" onClick={() => { setVisible5(true); }}>
+                              <p className="m-0">กดใช้โค้ด</p>
+                              <i className="pi pi-angle-right"></i>
+                            </div>
+                          </div>
+                          <div className="flex align-items-center border-bottom-1 surface-border justify-content-between py-2">
                             <p className="m-0">ส่วนลดร้านค้า</p>
                             <p className="m-0">฿0</p>
                           </div>
                           <div className="flex align-items-center justify-content-between py-2">
                             <p className="m-0">ยอดชำระ</p>
-                            <p className="m-0">฿{totalPayable.toFixed(2)}</p>
+                            <p className="m-0">฿{totalPayable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                           </div>
                         </div>
                       </div>
 
                       <div className="filter-card-group bg-white flex justify-content-end align-items-center border-top-1 surface-border z-1 sticky">
                         <p className="m-0 mr-2 text-900 font-semibold">
-                          รวม ฿{totalPayable.toFixed(2)}
+                          รวม ฿{totalPayable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         {Object.keys(selectedItems).length === 0 ? (
                           <Button
@@ -751,6 +842,7 @@ function Appbar() {
                 </div>
               </Sidebar>
               <Button
+                style={{ color: '#fece00' }}
                 icon="pi pi-bars"
                 onClick={() => setVisible1(true)}
                 rounded
@@ -770,11 +862,11 @@ function Appbar() {
                   />
                 </IconField>
                 <Button
-                  className="p-0 m-0 border-900 text-primary"
+                  className="p-0 m-0 border-900 text-yellow-200"
                   icon="pi pi-search"
                   onClick={handleSearchClick}
                   rounded
-                  style={{ width: '2.5rem', height: '2.5rem', backgroundColor: 'black' }}
+                  style={{ width: '2.5rem', height: '2.5rem', backgroundColor: 'black', color: '#fece00' }}
                 />
               </div>
             </div>
@@ -782,6 +874,7 @@ function Appbar() {
               <div className="flex justify-content-end">
                 {/* <Button icon="pi pi-heart" rounded text /> */}
                 <Button
+                  style={{ background: '#fece00', color: '#000000' }}
                   icon={
                     <span
                       style={{
