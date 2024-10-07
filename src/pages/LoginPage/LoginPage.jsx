@@ -80,7 +80,7 @@ function LoginPage() {
           />
           <span className="text-center hidden">OR</span>
           <Button className="mt-2 mb-4 hidden" label="เข้าสู่ระบบด้วย OTP" rounded />
-          <p className="text-center m-0 p-0 hidden">ไม่มีบัญชีผู้ใช้ <a href="/RegisterPage">สร้างบัญชี</a></p>
+          <p className="text-center m-0 p-0">ไม่มีบัญชีผู้ใช้ <a href="/RegisterPage">สร้างบัญชี</a></p>
           <p className="text-center m-0 p-0 hidden">ต้องการความช่วยเหลือใช่ไหม? <a href="#">แตะที่นี้</a></p>
         </div>
       </div>

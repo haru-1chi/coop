@@ -651,6 +651,9 @@ function Appbar() {
                           </Link>
                           {/* <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} /> */}
                           {/* <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} /> */}
+                          <Link to="/RegisterPage">
+                            <Button label="ลงทะเบียน" rounded />
+                          </Link>
                         </div>
                         <div>
                           <Button
