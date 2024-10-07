@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from 'primereact/button';
 import { Carousel } from 'primereact/carousel';
 import { useCart } from '../router/CartContext';
@@ -7,6 +7,7 @@ import { Toast } from 'primereact/toast';
 import img_placeholder from '../assets/img_placeholder.png';
 
 function Products({ data, startIndex }) {
+    const navigate = useNavigate();
     const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
     const { addToCart } = useCart();
     const [itemFlex, setItemFlex] = useState('0 0 20%');
@@ -47,7 +48,7 @@ function Products({ data, startIndex }) {
         const token = localStorage.getItem("token");
         if (!token) {
             showWarningToast();
-            window.location.href = import.meta.env.VITE_APP_API_URL;
+            navigate(`/LoginPage`);
         } else {
             addToCart(product)
             showSuccessToast();

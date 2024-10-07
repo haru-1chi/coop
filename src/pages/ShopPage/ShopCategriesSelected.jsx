@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link,useNavigate, useLocation, useParams } from "react-router-dom";
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { useCart } from '../../router/CartContext';
 import { Toast } from 'primereact/toast';
@@ -14,6 +14,7 @@ function ShopCategriesSelected() {
     const toast = useRef(null);
     const { partner_id } = useParams();
     const location = useLocation();
+    const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('');
@@ -89,7 +90,7 @@ function ShopCategriesSelected() {
         const token = localStorage.getItem("token");
         if (!token) {
             showWarningToast();
-            window.location.href = import.meta.env.VITE_APP_API_URL;
+            navigate(`/LoginPage`);
         } else {
             addToCart(product)
             showSuccessToast();

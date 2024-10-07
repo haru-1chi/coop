@@ -200,7 +200,7 @@ function ListProductsPage() {
     const token = localStorage.getItem("token");
     if (!token) {
       showWarningToast();
-      window.location.href = import.meta.env.VITE_APP_API_URL;
+      navigate(`/LoginPage`);
     } else {
       addToCart(product)
       showSuccessToast();

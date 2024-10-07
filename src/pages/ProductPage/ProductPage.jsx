@@ -4,12 +4,13 @@ import { useCart } from '../../router/CartContext';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import Footer from "../../component/Footer";
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Galleria } from 'primereact/galleria';
 import img_placeholder from '../../assets/img_placeholder.png';
 import axios from "axios";
 
 function ProductPage() {
+  const navigate = useNavigate();
   const location = useLocation();
   const product = location.state?.product;
   const { addToCart } = useCart();
@@ -79,7 +80,7 @@ function ProductPage() {
       .then((response) => {
         const partners = response.data.data;
         const partner = partners.find((partner) => partner._id === partner_id);
-        
+
         if (partner) {
           setPartnerPhone(partner.partner_phone);
         } else {
@@ -103,6 +104,16 @@ function ProductPage() {
     toast.current.show({
       severity: 'success', summary: 'เพิ่มในตะกร้าแล้ว', life: 2000
     });
+  };
+
+  const addCart = (product) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate(`/LoginPage`);
+    } else {
+      addToCart(product)
+      showSuccessToast();
+    }
   };
 
   useEffect(() => {
@@ -158,6 +169,8 @@ function ProductPage() {
   const handleThumbnailClick = (imgURL) => {
     setCurrentImageURL(imgURL);
   };
+
+
   return (
     <>
       <Toast ref={toast} position="top-center" />
@@ -217,7 +230,7 @@ function ProductPage() {
                   icon="pi pi-plus"
                   label="เพิ่มสินค้าในตะกร้า"
                   onClick={() => {
-                    addToCart(product)
+                    addCart(product)
                     show()
                   }}
                 />

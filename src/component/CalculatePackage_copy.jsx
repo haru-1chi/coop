@@ -3,6 +3,7 @@ import { useCart } from '../router/CartContext';
 import axios from "axios";
 
 function CalculatePackageCopy({ productQty, selectedOption }) {
+    const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
     const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
     const [user, setUser] = useState(null);
     const [address, setAddress] = useState(null);
@@ -10,15 +11,14 @@ function CalculatePackageCopy({ productQty, selectedOption }) {
     const [allPackageOptions, setAllPackageOptions] = useState({});
     const [allPackageDeliveries, setAllPackageDeliveries] = useState({});
     const { selectedItemsCart } = useCart();
-
     const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
 
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token");
             try {
-                const res = await axios.post(`${apiUrl}/me`, null, {
-                    headers: { "auth-token": token }
+                const res = await axios.get(`${apiCoopUrl}/me`, {
+                    headers: { "auth-token": `bearer ${token}` }
                 });
                 setUser(res.data.data);
                 setAddress(res.data.data.current_address);

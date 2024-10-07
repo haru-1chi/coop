@@ -136,8 +136,11 @@ function Navbar() {
         >
           <div className="px-3">
             <div className="flex justify-content-between pt-2 pb-4">
-              <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
-              <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
+              <Link to="/LoginPage">
+                <Button label="เข้าสู่ระบบ" outlined rounded />
+              </Link>
+              {/* <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} /> */}
+              {/* <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} /> */}
             </div>
             <div>
               <Button
@@ -154,7 +157,7 @@ function Navbar() {
                 แม็คโครลาว<span>เรียนรู้เพิ่มเติม</span>
               </div>
               <hr />
-              <div className="flex justify-content-between">
+              <div className="hidden justify-content-between">
                 <p className="p-0 m-0">ภาษา</p>
                 <LanguageSelector />
               </div>

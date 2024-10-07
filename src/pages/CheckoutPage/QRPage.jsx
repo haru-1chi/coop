@@ -14,10 +14,11 @@ const EXPIRE_TIME = 60;
 
 function QRPage() {
     const apiUrlPlatform = import.meta.env.VITE_REACT_APP_API_PLATFORM;
+    const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
     const apiUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
     const { cart, cartDetails, selectedItemsCart, clearCart, clearCartDetails, clearSelectedItemsCart } = useCart();
     const navigate = useNavigate();
-
+    const [user, setUser] = useState(null);
     const [productSubImage1, setProductSubImage1] = useState(null);
     const [productSubImage1Preview, setProductSubImage1Preview] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +32,24 @@ function QRPage() {
     const [paymentStatus, setPaymentStatus] = useState(null);
     const totalPayable = cartDetails.amountPayment;
     const paymentUUID = "BCELBANK";
+
+    useEffect(() => {
+        const getUserProfile = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(`${apiCoopUrl}/me`, {
+                    headers: { "auth-token": `bearer ${token}` }
+                });
+                setUser(res.data.data);
+            } catch (err) {
+                console.error(
+                    "Error fetching user data",
+                    err.response?.data || err.message
+                );
+            }
+        };
+        getUserProfile();
+    }, [apiCoopUrl]);
 
     const fileUploadRef = useRef(null);
 
@@ -47,11 +66,6 @@ function QRPage() {
     const handleCreateOrder = async () => {
         setLoading(true);
 
-        if (!productSubImage1) {
-            setError("กรุณาอัปโหลดสลิปก่อนยืนยันการชำระเงิน");
-            setLoading(false);
-            return;
-        }
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -60,50 +74,57 @@ function QRPage() {
                 return;
             }
 
-            let formData = new FormData();
-            formData.append('image_slip', productSubImage1);
-
-            try {
-                const slipValidationResponse = await axios.post(`${apiUrlPlatform}/check-slip`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-
-                if (slipValidationResponse.status !== 200) {
-                    setError(slipValidationResponse.data.message || "Slip validation failed.");
-                    setLoading(false);
-                    return;
-                }
-
-                const slipData = slipValidationResponse.data.data;
-                const paymentAmount = slipData.จำนวนเงิน;
-
-                if (slipValidationResponse.data.status === false) {
-                    setError(slipValidationResponse.data.message || "Invalid slip payment.");
-                    setLoading(false);
-                    return;
-                }
-
-                if (paymentAmount < totalPayable) {
-                    const remainingAmount = totalPayable - paymentAmount;
-                    setError(`โอนเงินไม่ครบ กรุณาอัพโหลดสลิปชำระเงินที่เหลืออีกครั้งเป็นจำนวน ${remainingAmount} บาท หรือติดต่อแอดมิน`);
-                    setLoading(false);
-                    return;
-                }
-
-                console.log("Slip validated successfully:", slipValidationResponse.data);
-            } catch (error) {
-                if (error.response) {
-                    setError(error.response.data.message || "Slip has already been used.");
-                } else {
-                    console.error('Error validating slip payment:', error);
-                    setError("Slip validation failed. Please try again.");
-                }
+            if (!productSubImage1 && cartDetails.payment === 'บัญชีธนาคาร') {
+                setError("กรุณาอัปโหลดสลิปก่อนยืนยันการชำระเงิน");
                 setLoading(false);
                 return;
             }
 
+            if (cartDetails.payment === 'บัญชีธนาคาร') {
+                let formData = new FormData();
+                formData.append('image_slip', productSubImage1);
+
+                try {
+                    const slipValidationResponse = await axios.post(`${apiUrlPlatform}/check-slip`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+
+                    if (slipValidationResponse.status !== 200) {
+                        setError(slipValidationResponse.data.message || "Slip validation failed.");
+                        setLoading(false);
+                        return;
+                    }
+
+                    const slipData = slipValidationResponse.data.data;
+                    const paymentAmount = slipData.จำนวนเงิน;
+
+                    if (slipValidationResponse.data.status === false) {
+                        setError(slipValidationResponse.data.message || "Invalid slip payment.");
+                        setLoading(false);
+                        return;
+                    }
+
+                    if (paymentAmount < totalPayable) {
+                        const remainingAmount = totalPayable - paymentAmount;
+                        setError(`โอนเงินไม่ครบ กรุณาอัพโหลดสลิปชำระเงินที่เหลืออีกครั้งเป็นจำนวน ${remainingAmount} บาท หรือติดต่อแอดมิน`);
+                        setLoading(false);
+                        return;
+                    }
+
+                    console.log("Slip validated successfully:", slipValidationResponse.data);
+                } catch (error) {
+                    if (error.response) {
+                        setError(error.response.data.message || "Slip has already been used.");
+                    } else {
+                        console.error('Error validating slip payment:', error);
+                        setError("Slip validation failed. Please try again.");
+                    }
+                    setLoading(false);
+                    return;
+                }
+            }
             for (let partner_id in selectedItemsCart) {
                 const partner = selectedItemsCart[partner_id];
 
@@ -161,23 +182,47 @@ function QRPage() {
                 };
                 console.log(newOrder)
 
+                if (totalPayable > user.coop_coupon) {
+                    setError(`จำนวนเงินเพียงพอ กรุณาเติมเงินให้เพียงพอแล้วทำรายการอีกครั้ง`);
+                    return;
+                }
+
                 const orderResponse = await axios.post(`${apiUrl}/orderproduct`, newOrder);
 
                 if (orderResponse.data && orderResponse.data.status) {
                     console.log("Order successful for partner:", partner.partner_name, orderResponse.data);
 
+                    const useCoupon = {
+                        ref_code: orderResponse.data.data.orderref,
+                        ref_type: "e-market",
+                        amount: totalPayable,
+                        user_id: cartDetails.customer_id,
+                    };
+
+                    console.log(useCoupon)
                     try {
-                        setIsLoading(true);
-                        const uploadResponse = await axios.put(`${apiUrl}/orderproduct/addslippayment/${orderResponse.data.data._id}`, formData, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data',
-                            },
+                        const useCouponResponse = await axios.post(`${apiCoopUrl}/coupons/use`, useCoupon, {
+                            headers: { "auth-token": `bearer ${token}` },
                         });
-                        console.log('Upload successful:', uploadResponse.data);
+                        console.log(useCouponResponse.data);
                     } catch (error) {
-                        console.error('Error uploading file:', error);
-                    } finally {
-                        setIsLoading(false);
+                        throw new Error("Coupon use failed.");
+                    }
+
+                    if (cartDetails.payment === 'บัญชีธนาคาร') {
+                        try {
+                            setIsLoading(true);
+                            const uploadResponse = await axios.put(`${apiUrl}/orderproduct/addslippayment/${orderResponse.data.data._id}`, formData, {
+                                headers: {
+                                    'Content-Type': 'multipart/form-data',
+                                },
+                            });
+                            console.log('Upload successful:', uploadResponse.data);
+                        } catch (error) {
+                            console.error('Error uploading file:', error);
+                        } finally {
+                            setIsLoading(false);
+                        }
                     }
                 } else {
                     setError(orderResponse.data.message || "Order failed");
@@ -187,7 +232,8 @@ function QRPage() {
             clearCart(cart, selectedItemsCart);
             clearCartDetails();
             clearSelectedItemsCart();
-            navigate("/PaymentSuccessfully");
+            window.location.href = '/PaymentSuccessfully';
+            // navigate("/PaymentSuccessfully");
         } catch (error) {
             console.error("Order error:", error.response?.data || error.message);
             setError(error.response?.data?.message || "An error occurred. Please try again.");
@@ -199,7 +245,6 @@ function QRPage() {
     const renderWalletDetails = () => (
         <>
             <div className="flex justify-content-center">
-                <p>E-wallet ล่ะ</p>
                 {/* {qrCodeUrl && (
                     <div>
                         <p className="m-0 p-0 text-center">Qr Code</p>
@@ -213,13 +258,29 @@ function QRPage() {
                 )} */}
             </div>
             <div className="flex">
-                <div className="flex-grow-1 flex flex-column text-center">
-                    <p className="m-0 mb-3 p-0 text-2xl font-bold">จำนวนเงิน(บาท)</p>
+                <div className="flex-grow-1 flex flex-column">
+                    <p className="m-0 mb-3 p-0 text-2xl font-bold text-center">รวมยอดชำระ(บาท)</p>
                     {totalPayable && (
-                        <p className="m-0 text-2xl font-bold">
+                        <p className="m-0 text-2xl font-bold text-center">
                             ฿{Number(totalPayable.toFixed(2)).toLocaleString('en-US')}
                         </p>
                     )}
+
+                    <div className="pt-3 my-3 border-top-1 surface-border">
+                        <div className="flex align-items-start justify-content-between">
+                            <p className="m-0 p-0 text-xl font-semibold">ช่องทางชำระเงิน</p>
+                            <p className="m-0 text-lg">คูปอง Voucher</p>
+                        </div>
+                        {totalPayable && (
+                            <div className="flex align-items-center justify-content-between">
+                                <p className="m-0 text-lg font-normal">ยอดเงินปัจจุบัน</p>
+                                <p className="m-0 text-lg font-normal">
+                                    ฿{Number(user?.coop_coupon.toFixed(2)).toLocaleString('en-US')}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                    {error && <p className="text-red-500 font-semibold text-center text-xl">{error}</p>}
                     {/* {qrCodeUrl && (
                         <div className="p-0 my-2 surface-200 border-round flex justify-content-center align-content-center">
                             <p className="my-3">ชำระเงินภายใน {remainingTime} seconds</p>
@@ -227,7 +288,6 @@ function QRPage() {
                     )} */}
                 </div>
             </div>
-            <p className="text-center">*กรุณาเปิดหน้านี้ไว้ จนกว่าชำระเงินนี้สำเร็จ</p>
         </>
     )
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useCart } from '../../router/CartContext';
 import { Toast } from 'primereact/toast';
@@ -9,6 +9,7 @@ import img_placeholder from '../../assets/img_placeholder.png';
 
 function ShopListProduct({ partner_id }) {
     const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
+    const navigate = useNavigate();
     const { addToCart } = useCart();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -80,7 +81,7 @@ function ShopListProduct({ partner_id }) {
         const token = localStorage.getItem("token");
         if (!token) {
             showWarningToast();
-            window.location.href = import.meta.env.VITE_APP_API_URL;
+            navigate(`/LoginPage`);
         } else {
             addToCart(product)
             showSuccessToast();

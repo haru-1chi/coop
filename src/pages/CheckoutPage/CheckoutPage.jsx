@@ -19,6 +19,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 
 function CheckoutPage() {
     const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
+    const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
     const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
     const [user, setUser] = useState(null);
     const [address, setAddress] = useState(null);
@@ -34,8 +35,8 @@ function CheckoutPage() {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token");
             try {
-                const res = await axios.post(`${apiUrl}/me`, null, {
-                    headers: { "auth-token": token }
+                const res = await axios.get(`${apiCoopUrl}/me`, {
+                    headers: { "auth-token": `bearer ${token}` }
                 });
                 setUser(res.data.data);
                 setAddress(res.data.data.current_address);
@@ -455,13 +456,13 @@ function CheckoutPage() {
             // partner_id: selectedItemsCart,
             amountPayment: totalPayable, // Total payable for all bills
             customer_id: user._id,
-            customer_name: address?.customer_name || user?.fristname + " " + user?.lastname,
+            customer_name: address?.customer_name || user?.name,
             customer_address: address?.customer_address || address?.address,
             customer_tambon: address?.customer_tambon?.name_th || address?.subdistrict,
             customer_amphure: address?.customer_amphure?.name_th || address?.district,
             customer_province: address?.customer_province?.name_th || address?.province,
             customer_zipcode: address?.customer_zipcode || address?.postcode,
-            customer_telephone: address?.customer_telephone || user.tel,
+            customer_telephone: address?.customer_telephone || user.phone,
 
             // Add delivery_detail structured by partner and their respective products
             delivery_detail: Object.entries(groupByPartner).map(([partnerId, partnerData]) => ({
@@ -509,12 +510,12 @@ function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {user && address && (
+                            {user && (
                                 <div className="flex justify-content-between">
                                     <div>
-                                        <p className='m-0'>ชื่อ: {address.customer_name || (user.fristname + ' ' + user.lastname)}</p>
-                                        <p className='m-0'>เบอร์โทร: {address.customer_telephone || user.tel}</p>
-                                        <p className='m-0'>ที่อยู่: {`${address.customer_address || address?.address}, ${address.customer_tambon?.name_th || address?.subdistrict}, ${address.customer_amphure?.name_th || address?.district}, ${address.customer_province?.name_th || address?.province}, ${address.customer_zipcode || address?.postcode}`}</p>
+                                        <p className='m-0'>ชื่อ: {address?.customer_name || (user?.name)}</p>
+                                        <p className='m-0'>เบอร์โทร: {address?.customer_telephone || user?.phone}</p>
+                                        <p className='m-0'>ที่อยู่: {`${address?.customer_address || address?.address}, ${address?.customer_tambon?.name_th || address?.subdistrict}, ${address?.customer_amphure?.name_th || address?.district}, ${address?.customer_province?.name_th || address?.province}, ${address?.customer_zipcode || address?.postcode}`}</p>
                                         {!isUsingNewAddress ? <p className='w-fit px-1 border-1 border-round border-primary'>ค่าเริ่มต้น</p> : <p className='w-fit px-1 border-1 border-round border-primary'>ใช้ที่อยู่ใหม่</p>}
                                     </div>
                                 </div>
@@ -545,7 +546,7 @@ function CheckoutPage() {
                                 // <p>{CalculatePackageCopy}</p>
                                 <div key={index} className='flex flex-column p-3 border-1 surface-border border-round bg-white border-round-mb justify-content-center'>
                                     <div className='w-full'>
-                                        <Link to={`/ShopPage/${selectedItemsCart.partner_id}`} className="no-underline text-900">
+                                        <Link to={`/ShopPage/${partner_id}`} className="no-underline text-900">
                                             <div className='flex align-items-center mb-2'>
                                                 <i className="pi pi-shop mr-1"></i>
                                                 <h4 className='m-0 font-semibold'>ผู้ขาย {partner_name}</h4>

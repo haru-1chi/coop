@@ -12,11 +12,14 @@ import { Badge } from "primereact/badge";
 import { Menu } from "primereact/menu";
 import { Dialog } from "primereact/dialog";
 import { RadioButton } from 'primereact/radiobutton';
+
 //
 import LanguageSelector from "./LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../router/CartContext";
 import axios from "axios";
+import Topup from "./Topup";
+import TopupHistory from "./TopupHistory";
 import ContactUs from "./ContactUs";
 import CategoriesIcon from "./CategoriesIcon";
 import GenerateCategories from "./GenerateCategories";
@@ -29,6 +32,8 @@ function Appbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const op = useRef(null);
   const [isContactUsVisible, setContactUsVisible] = useState(false);
+  const [isTopupVisible, setTopupVisible] = useState(false);
+  const [isTopupHistoryVisible, setTopupHistoryVisible] = useState(false);
   const itemsMenu = [
     {
       label: "บัญชีของฉัน",
@@ -149,6 +154,7 @@ function Appbar() {
     navigate("/CheckoutPage");
   };
   const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
+  const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
   const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
   const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -179,8 +185,8 @@ function Appbar() {
     const getUserProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.post(`${apiUrl}/me`, null, {
-          headers: { "auth-token": token }
+        const res = await axios.get(`${apiCoopUrl}/me`, {
+          headers: { "auth-token": `bearer ${token}` }
         });
         console.log(res)
         setUser(res.data.data);
@@ -192,7 +198,7 @@ function Appbar() {
       }
     };
     getUserProfile();
-  }, [apiUrl]);
+  }, [apiCoopUrl]);
 
   // useEffect(() => {
   //   const fetchCategories = () => {
@@ -271,7 +277,7 @@ function Appbar() {
     localStorage.removeItem("user_id");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = 'https://service.tossaguns.online/';
+    navigate("/LoginPage");
   };
 
 
@@ -331,7 +337,7 @@ function Appbar() {
         </div>
         <div className='flex justify-content-end gap-3 mt-4'>
           <Button onClick={() => setVisible5(false)} label='ยกเลิก' outlined />
-          <Button label='ยืนยัน' onClick={() => setVisible5(false)}/>
+          <Button label='ยืนยัน' onClick={() => setVisible5(false)} />
         </div>
       </Dialog>
 
@@ -417,7 +423,7 @@ function Appbar() {
                       style={{ background: '#fece00', color: '#000000' }}
                       label={
                         <div className="flex align-items-center gap-2 white-space-nowrap text-overflow-ellipsis">
-                          {user.fristname}
+                          {user?.name}
                           <i className="pi pi-angle-down"></i>
                         </div>
                       }
@@ -429,12 +435,11 @@ function Appbar() {
                       <div className="flex p-0 pb-2 border-bottom-1 surface-border align-items-center">
                         <div className="flex flex-wrap justify-content-center">
                           <div className="border-circle w-4rem h-4rem m-2 bg-primary font-bold flex align-items-center justify-content-center">
-
-                            {/* {user?.fristname.charAt(0).toUpperCase()} */}
+                            {user?.name.charAt(0).toUpperCase()}
                           </div>
                         </div>
                         <h4 className="ml-3">
-                          {user.fristname} {user.lastname}
+                          {user.name}
                         </h4>
                       </div>
                       <div className="flex flex-column">
@@ -526,23 +531,36 @@ function Appbar() {
                             <div className="border-circle w-4rem h-4rem m-2 bg-cyan-500 font-bold flex align-items-center justify-content-center">{user.fristname.charAt(0).toUpperCase()}</div>
                           </div> */}
                           <div className="w-full">
-                            <h3 className="m-0 mt-1 mb-2 p-0 font-semibold text-center">{user.fristname} {user.lastname}</h3>
+                            <h3 className="m-0 mt-1 mb-2 p-0 font-semibold text-center">{user.name}</h3>
                             <div className="w-full flex justify-content-between px-3 align-items-center ">
                               <div className="flex flex-column justify-content-center align-items-center pr-4 border-right-1 border-white">
                                 <div className="flex align-items-center justify-content-center">
                                   <i className="pi pi-wallet" style={{ fontSize: '1.3rem' }}></i>
-                                  <h3 className="m-0 ml-2 p-0 text-2xl font-semibold text-center">฿{Number(user.wallet).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+                                  <h3 className="m-0 ml-2 p-0 text-2xl font-semibold text-center">฿{Number(user.coop_coupon).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                                 </div>
                                 <p className="m-0 text-center">ยอดเงินคงเหลือ</p>
                               </div>
-                              <div className="flex flex-column justify-content-center align-items-center cursor-pointer" onClick={() => window.open('https://service.tossaguns.online/wallet', '_blank')}>
+                              <div className="flex flex-column justify-content-center align-items-center cursor-pointer" onClick={() => setTopupVisible(true)}>
                                 <div className="text-center">
                                   <svg fill="#ffffff" width="1.6rem" height="1.6rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4,5A1,1,0,0,0,5,6H21a1,1,0,0,1,1,1V21a1,1,0,0,1-1,1H16a1,1,0,0,1,0-2h4V8H5a2.966,2.966,0,0,1-1-.184V19a1,1,0,0,0,1,1h5a1,1,0,0,0,1-1V14.414L9.707,15.707a1,1,0,0,1-1.414-1.414l3-3a.99.99,0,0,1,.326-.217,1,1,0,0,1,.764,0,.99.99,0,0,1,.326.217l3,3a1,1,0,0,1-1.414,1.414L13,14.414V19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H21a1,1,0,0,1,0,2H5A1,1,0,0,0,4,5Z" /></svg>
                                 </div>
                                 <p className="m-0 text-center">เติมเงินเข้า E-wallet</p>
                               </div>
-
+                              <Topup
+                                visible={isTopupVisible}
+                                setVisible={setTopupVisible}
+                                user={user}
+                              />
                             </div>
+                            <div className="flex justify-content-end align-items-center mt-2 cursor-pointer" onClick={() => setTopupHistoryVisible(true)}>
+                              <p className="m-0">ประวัติการทำรายการ</p>
+                              <i className="pi pi-angle-right"></i>
+                            </div>
+                            <TopupHistory
+                                visible={isTopupHistoryVisible}
+                                setVisible={setTopupHistoryVisible}
+                                user={user}
+                              />
                           </div>
                         </div>
 
@@ -593,9 +611,7 @@ function Appbar() {
                           </ul>
                         </div>
 
-
                         <hr />
-
                         <div className="flex flex-column">
                           <Menu model={itemsMenu} className="p-menu" />
                           <ContactUs
@@ -604,7 +620,7 @@ function Appbar() {
                           />
                         </div>
                         <hr />
-                        <div className="flex justify-content-between px-3">
+                        <div className="hidden justify-content-between px-3">
                           <p className="p-0 m-0">ภาษา</p>
                           <LanguageSelector />
                         </div>
@@ -630,8 +646,11 @@ function Appbar() {
                     ) : (
                       <div className="px-3">
                         <div className="flex justify-content-between pt-2 pb-4">
-                          <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
-                          <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} />
+                          <Link to="/LoginPage">
+                            <Button label="เข้าสู่ระบบ" outlined rounded />
+                          </Link>
+                          {/* <Button label="เข้าสู่ระบบ" outlined rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} /> */}
+                          {/* <Button label="ลงทะเบียน" rounded onClick={() => window.location.href = import.meta.env.VITE_APP_API_URL} /> */}
                         </div>
                         <div>
                           <Button
@@ -659,7 +678,7 @@ function Appbar() {
                           </div>
                         </div>
                         <hr />
-                        <div className="flex justify-content-between">
+                        <div className="hidden justify-content-between">
                           <p className="p-0 m-0">ภาษา</p>
                           <LanguageSelector />
                         </div>

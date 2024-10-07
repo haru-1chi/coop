@@ -9,7 +9,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
-  const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
+  const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -18,11 +18,12 @@ function LoginPage() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${apiUrl}/login`, {
+      const response = await axios.post(`${apiCoopUrl}/users/login`, {
         username,
         password,
+        grant_code: 'coop89988'
       });
-      if (response.data.status) {
+      if (response.status === 200) {
         console.log("Login successful", response.data);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user_id", response.data.data._id);
@@ -79,7 +80,7 @@ function LoginPage() {
           />
           <span className="text-center hidden">OR</span>
           <Button className="mt-2 mb-4 hidden" label="เข้าสู่ระบบด้วย OTP" rounded />
-          <p className="text-center m-0 p-0">ไม่มีบัญชีผู้ใช้ <a href="/RegisterPage">สร้างบัญชี</a></p>
+          <p className="text-center m-0 p-0 hidden">ไม่มีบัญชีผู้ใช้ <a href="/RegisterPage">สร้างบัญชี</a></p>
           <p className="text-center m-0 p-0 hidden">ต้องการความช่วยเหลือใช่ไหม? <a href="#">แตะที่นี้</a></p>
         </div>
       </div>

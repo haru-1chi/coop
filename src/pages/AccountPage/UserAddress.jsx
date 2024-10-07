@@ -9,6 +9,7 @@ import ProvinceSelection from "../../component/ProvinceSelection";
 
 function UserAddress() {
     const [address, setAddress] = useState([]);
+    const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
     const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
     const [user, setUser] = useState(null);
 
@@ -16,9 +17,9 @@ function UserAddress() {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token");
             try {
-                const res = await axios.post(`${apiUrl}/me`, null, {
-                    headers: { "auth-token": token }
-                });
+                const res = await axios.get(`${apiCoopUrl}/me`, {
+                    headers: { "auth-token": `bearer ${token}` }
+                  });
                 setUser(res.data.data);
                 setAddress(res.data.data.current_address);
             } catch (err) {
@@ -36,8 +37,8 @@ function UserAddress() {
                 </div>
                 <div className='flex justify-content-between align-items-start border-bottom-1 surface-border'>
                     <div>
-                        <p>ชื่อ {user?.fristname} {user?.lastname}</p>
-                        <p>เบอร์โทร {user?.tel || 'เบอร์โทรไม่ระบุ'}</p>
+                        <p>ชื่อ {user?.name}</p>
+                        <p>เบอร์โทร {user?.phone || 'เบอร์โทรไม่ระบุ'}</p>
                         <p>ที่อยู่ {`${address?.address}, ${address?.subdistrict}, ${address?.district}, ${address?.province}, ${address?.postcode}`}</p>
                         {address?.isDefault ? (
                             <p className='w-fit px-1 border-1 border-round border-primary'>ค่าเริ่มต้น</p>
