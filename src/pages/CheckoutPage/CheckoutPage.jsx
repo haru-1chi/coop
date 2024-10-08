@@ -10,6 +10,7 @@ import { Dialog } from "primereact/dialog";
 import { Checkbox } from 'primereact/checkbox';
 import Footer from "../../component/Footer";
 import ProvinceSelection from "../../component/ProvinceSelection";
+import ListAddresses from "../../component/ListAddresses";
 // import CalculatePackage from "../../component/CalculatePackage";
 // import CalculatePackageCopy from "../../component/CalculatePackageCopy";
 import img_placeholder from '../../assets/img_placeholder.png';
@@ -23,11 +24,13 @@ function CheckoutPage() {
     const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
     const [user, setUser] = useState(null);
     const [address, setAddress] = useState(null);
+    const [listAddress, setListAddress] = useState([]);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [loadingState, setLoadingState] = useState({});
     const [visible1, setVisible1] = useState(false);
     const [visible2, setVisible2] = useState(false);
+    const [addressVisible, setAddressVisible] = useState(false);
     const { selectedItemsCart, placeCartDetail } = useCart();
     const [error, setError] = useState(false);
     const [test, setTest] = useState([]);
@@ -39,7 +42,6 @@ function CheckoutPage() {
                     headers: { "auth-token": `bearer ${token}` }
                 });
                 setUser(res.data.data);
-                setAddress(res.data.data.current_address);
             } catch (err) {
                 console.error("Error fetching user data", err.response?.data || err.message);
             } finally {
@@ -48,6 +50,32 @@ function CheckoutPage() {
         };
         fetchUserData();
     }, [apiUrl]);
+
+    useEffect(() => {
+        const fetchUserAddress = async () => {
+            const token = localStorage.getItem("token");
+            const user_id = localStorage.getItem("user_id");
+            try {
+                const res = await axios.get(`${apiCoopUrl}/users/${user_id}/address/get`, {
+                    headers: { "auth-token": `bearer ${token}` }
+                });
+                setListAddress(res.data.data)
+                const addressList = res.data.data;
+
+                if (user && user.mainAddress) {
+                    const matchingAddress = addressList.find((address) => address._id === user.mainAddress);
+                    if (matchingAddress) {
+                        setAddress(matchingAddress);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching user address", err.response?.data || err.message);
+            }
+        };
+        if (user) {
+            fetchUserAddress();
+        }
+    }, [apiUrl, user]);
 
     //vที่อยู่จัดส่ง
     const [addressFormData, setAddressFormData] = useState({
@@ -322,13 +350,13 @@ function CheckoutPage() {
                     tel: partner.partner_phone,
                 },
                 to: {
-                    name: address?.customer_name || `${user?.fristname} ${user?.lastname}`,
+                    name: address?.customer_name || `${user.name}`,
                     address: address?.customer_address || address?.address,
-                    district: address?.customer_tambon?.name_th || address?.subdistrict,
-                    state: address?.customer_amphure?.name_th || address?.district,
+                    district: address?.customer_tambon?.name_th || address?.district,
+                    state: address?.customer_amphure?.name_th || address?.amphure,
                     province: address?.customer_province?.name_th || address?.province,
-                    postcode: address?.customer_zipcode || address?.postcode,
-                    tel: address?.customer_telephone || user?.tel
+                    postcode: address?.customer_zipcode || address?.zipcode,
+                    tel: address?.customer_telephone || user?.phone
                 },
                 parcel: {
                     name: `สินค้าชิ้นที่ ${productId}`,
@@ -338,6 +366,7 @@ function CheckoutPage() {
                     height: selectedPackageOptions[partner_id]?.[productId]?.product_package_options.package_height,
                 },
             };
+            console.log(packageDetails)
             const token = localStorage.getItem("token");
             const response = await axios.post(`${apiUrl}/e-market/express/price`, packageDetails, {
                 headers: { "auth-token": token }
@@ -458,10 +487,10 @@ function CheckoutPage() {
             customer_id: user._id,
             customer_name: address?.customer_name || user?.name,
             customer_address: address?.customer_address || address?.address,
-            customer_tambon: address?.customer_tambon?.name_th || address?.subdistrict,
-            customer_amphure: address?.customer_amphure?.name_th || address?.district,
+            customer_tambon: address?.customer_tambon?.name_th || address?.district,
+            customer_amphure: address?.customer_amphure?.name_th || address?.amphure,
             customer_province: address?.customer_province?.name_th || address?.province,
-            customer_zipcode: address?.customer_zipcode || address?.postcode,
+            customer_zipcode: address?.customer_zipcode || address?.zipcode,
             customer_telephone: address?.customer_telephone || user.phone,
 
             // Add delivery_detail structured by partner and their respective products
@@ -505,9 +534,25 @@ function CheckoutPage() {
                                     <i className="m-0 mr-2 pi pi-map-marker"></i>
                                     <h2 className='m-0 font-semibold'>ที่อยู่สำหรับจัดส่ง</h2>
                                 </div>
-                                <div>
-                                    <p className='text-blue-500 cursor-pointer' onClick={() => { setVisible1(true); }}>ใช้ที่อยู่ใหม่</p>
+                                <div className="flex gap-5">
+                                    <div>
+                                        <p className='text-blue-500 cursor-pointer'
+                                            onClick={() => setAddressVisible(true)}
+                                        >เลือกที่อยู่ของฉัน</p>
+                                    </div>
+                                    <div>
+                                        <p className='text-blue-500 cursor-pointer'
+                                            onClick={() => { setVisible1(true); }}
+                                        >ใช้ที่อยู่ใหม่</p>
+                                    </div>
                                 </div>
+
+                                <ListAddresses
+                                    visible={addressVisible}
+                                    setVisible={setAddressVisible}
+                                    user={user}
+                                    listAddress={listAddress}
+                                />
                             </div>
 
                             {user && (
@@ -515,7 +560,7 @@ function CheckoutPage() {
                                     <div>
                                         <p className='m-0'>ชื่อ: {address?.customer_name || (user?.name)}</p>
                                         <p className='m-0'>เบอร์โทร: {address?.customer_telephone || user?.phone}</p>
-                                        <p className='m-0'>ที่อยู่: {`${address?.customer_address || address?.address}, ${address?.customer_tambon?.name_th || address?.subdistrict}, ${address?.customer_amphure?.name_th || address?.district}, ${address?.customer_province?.name_th || address?.province}, ${address?.customer_zipcode || address?.postcode}`}</p>
+                                        <p className='m-0'>ที่อยู่: {`${address?.customer_address || address?.address}, ${address?.customer_tambon?.name_th || address?.district}, ${address?.customer_amphure?.name_th || address?.amphure}, ${address?.customer_province?.name_th || address?.province}, ${address?.customer_zipcode || address?.zipcode}`}</p>
                                         {!isUsingNewAddress ? <p className='w-fit px-1 border-1 border-round border-primary'>ค่าเริ่มต้น</p> : <p className='w-fit px-1 border-1 border-round border-primary'>ใช้ที่อยู่ใหม่</p>}
                                     </div>
                                 </div>

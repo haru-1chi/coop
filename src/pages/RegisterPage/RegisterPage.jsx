@@ -19,12 +19,11 @@ function RegisterPage() {
   const [formData, setFormData] = useState({
     ref_tel: "",
     tel: "",
-    email: "",
+    prefix: "",
     fristname: "",
     lastname: "",
     password: "",
     confirmPassword: "",
-    //
     address: "",
     subdistrict: "",
     district: "",
@@ -33,14 +32,27 @@ function RegisterPage() {
   });
 
   const validateForm = () => {
-    const { tel, email, password, confirmPassword } = formData;
+    const {
+      tel,
+      prefix,
+      fristname,
+      lastname,
+      password,
+      confirmPassword,
+      address,
+      subdistrict,
+      district,
+      province,
+      postcode,
+    } = formData;
+
+    if (!prefix || !tel || !fristname || !lastname || !password || !confirmPassword ||
+      !address || !subdistrict || !district || !province || !postcode) {
+      return "กรุณากรอกข้อมูลทุกช่อง";
+    }
 
     if (!/^\d{10}$/.test(tel)) {
       return "เบอร์โทรศัพท์ต้องเป็นตัวเลข";
-    }
-
-    if (email && !/\S+@\S+\.\S+/.test(email)) {
-      return "กรุณาป้อนอีเมลในรูปแบบที่ถูกต้อง";
     }
 
     if (password !== confirmPassword) {
@@ -65,23 +77,30 @@ function RegisterPage() {
     setLoading(true);
     setErrorMessage(null);
     const newFormData = {
-      ref_tel: formData.ref_tel,
-      tel: formData.tel,
-      email: formData.email,
+      ref_tel: formData.ref_tel || '0909500709',
+      prefix: formData.prefix,
       fristname: formData.fristname,
       lastname: formData.lastname,
+      tel: formData.tel,
       password: formData.password,
-      confirmPassword: formData.confirmPassword,
       //
       address: formData.address,
       subdistrict: formData.subdistrict.name_th,
       district: formData.district.name_th,
       province: formData.province.name_th,
-      postcode: formData.postcode,
+      postcode: String(formData.postcode),
+      current_address: {
+        address: formData.address,
+        subdistrict: formData.subdistrict.name_th,
+        district: formData.district.name_th,
+        province: formData.province.name_th,
+        postcode: String(formData.postcode),
+      },
     }
     console.log(newFormData)
     try {
-      const response = await axios.post(`${apiUrl}/platform/register`, newFormData);
+      const response = await axios.post(`${apiUrl}/member/create`, newFormData);
+      console.log(response);
       if (response.data.status) {
         console.log("Register successful", response.data);
         navigate("/LoginPage");
@@ -166,6 +185,14 @@ function RegisterPage() {
       postcode: selectedTambon ? selectedTambon.zip_code : ''
     }));
   };
+
+  const prefixes = [
+    { name: "นาย", value: "นาย" },
+    { name: "นาง", value: "นาง" },
+    { name: "นางสาว", value: "นางสาว" },
+    { name: "ไม่ระบุ", value: "ไม่ระบุ" }
+  ];
+
   return (
     <>
       <div className='w-full flex flex-column gap-2 justify-content-center'>
@@ -174,7 +201,7 @@ function RegisterPage() {
           <p className="p-0 my-1">สร้างบัญชีง่ายๆ ใน 1 นาที แล้วเลือกซื้อสินค้าที่คุณต้องการได้เลย</p>
           <div className="card my-4 flex flex-column justify-content-center">
             <FloatLabel className="w-full mb-3">
-              <label htmlFor="ref_tel">เบอร์มือถือผู้อ้างอิง</label>
+              <label htmlFor="ref_tel">เบอร์มือถือผู้อ้างอิง (ไม่บังคับ)</label>
               <InputText
                 id="ref_tel"
                 value={formData.ref_tel}
@@ -194,7 +221,7 @@ function RegisterPage() {
               />
             </FloatLabel>
 
-            <FloatLabel className="w-full mb-3">
+            {/* <FloatLabel className="w-full mb-3">
               <label htmlFor="email">อีเมล (ไม่บังคับ)</label>
               <InputText
                 id="email"
@@ -203,6 +230,19 @@ function RegisterPage() {
                 className="w-full"
                 keyfilter="email"
               />
+            </FloatLabel> */}
+            <FloatLabel className="w-full mb-3">
+              <Dropdown
+                filter
+                inputId="prefix"
+                value={formData.prefix}
+                onChange={(e) => setFormData(prevData => ({ ...prevData, prefix: e.value }))}
+                options={prefixes}
+                optionLabel="name"
+                placeholder="ระบุคำนำหน้า"
+                className="w-full"
+              />
+              <label htmlFor="prefix">เลือกคำนำหน้า</label>
             </FloatLabel>
 
             <FloatLabel className="w-full mb-3">
@@ -248,7 +288,7 @@ function RegisterPage() {
               />
               <label htmlFor="confirmPassword">ยืนยันรหัสผ่าน</label>
             </FloatLabel>
-            <p>***********</p>
+            
             <FloatLabel className="w-full mb-3">
               <label htmlFor="address">ที่อยู่</label>
               <InputText
@@ -338,6 +378,7 @@ function RegisterPage() {
           </div>
         </div>
       </div>
+      
     </>
   );
 }
