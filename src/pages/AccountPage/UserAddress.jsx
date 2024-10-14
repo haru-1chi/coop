@@ -29,6 +29,43 @@ function UserAddress() {
         mainAddress: false,
     });
 
+    const fetchUserAddress = async () => {
+        const token = localStorage.getItem("token");
+        const user_id = localStorage.getItem("user_id");
+        try {
+            const res = await axios.get(`${apiCoopUrl}/users/${user_id}/address/get`, {
+                headers: { "auth-token": `bearer ${token}` }
+            });
+            setAddress(res.data.data);
+        } catch (err) {
+            console.error("Error fetching user address", err.response?.data || err.message);
+        }
+    };
+
+    const fetchUserData = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const res = await axios.get(`${apiCoopUrl}/me`, {
+                headers: { "auth-token": `bearer ${token}` }
+            });
+            setUser(res.data.data);
+
+            if (selectedAddress?._id) {
+                setSelectedAddress((prev) => ({
+                    ...prev,
+                    mainAddress: user.mainAddress === prev._id,
+                }));
+            }
+        } catch (err) {
+            console.error("Error fetching user data", err.response?.data || err.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserAddress();
+        fetchUserData();
+    }, [apiUrl]);
+
     const handlenewAddressInputChange = (e) => {
         const { id, value, type, checked } = e.target;
         setNewAddress((prevAddress) => ({
@@ -78,6 +115,8 @@ function UserAddress() {
                 );
                 console.log("New address set as main address.");
             }
+            await fetchUserData();
+            await fetchUserAddress();
             setVisible3(false);
         } catch (err) {
             console.error("Error fetching user address", err.response?.data || err.message);
@@ -114,6 +153,8 @@ function UserAddress() {
                 );
                 console.log("New address set as main address.");
             }
+            await fetchUserData();
+            await fetchUserAddress();
             setVisible1(false);
         } catch (err) {
             console.error("Error fetching user address", err.response?.data || err.message);
@@ -130,49 +171,12 @@ function UserAddress() {
             const res = await axios.post(`${apiCoopUrl}/users/${user_id}/address/delete`, newSelectedAddress, {
                 headers: { "auth-token": `bearer ${token}` }
             });
+            await fetchUserAddress();
             setVisible2(false);
         } catch (err) {
             console.error("Error fetching user address", err.response?.data || err.message);
         }
     };
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const token = localStorage.getItem("token");
-            try {
-                const res = await axios.get(`${apiCoopUrl}/me`, {
-                    headers: { "auth-token": `bearer ${token}` }
-                });
-                setUser(res.data.data);
-
-                if (selectedAddress?._id) {
-                    setSelectedAddress((prev) => ({
-                        ...prev,
-                        mainAddress: user.mainAddress === prev._id,
-                    }));
-                }
-            } catch (err) {
-                console.error("Error fetching user data", err.response?.data || err.message);
-            }
-        };
-        fetchUserData();
-    }, [apiUrl]);
-
-    useEffect(() => {
-        const fetchUserAddress = async () => {
-            const token = localStorage.getItem("token");
-            const user_id = localStorage.getItem("user_id");
-            try {
-                const res = await axios.get(`${apiCoopUrl}/users/${user_id}/address/get`, {
-                    headers: { "auth-token": `bearer ${token}` }
-                });
-                setAddress(res.data.data);
-            } catch (err) {
-                console.error("Error fetching user address", err.response?.data || err.message);
-            }
-        };
-        fetchUserAddress();
-    }, [apiUrl]);
 
     //
     const [provinces, setProvinces] = useState([]);

@@ -5,30 +5,21 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { formatDate } from "../utils/DateTimeFormat";
-function ListlistAddresses({ visible, setVisible, user, listAddress }) {
-    // const apiCoopUrl = import.meta.env.VITE_REACT_APP_API_COOP;
-    // const [topup, setTopup] = useState(0)
-    // const [topupHistory, setTopupHistory] = useState(null)
+function ListlistAddresses({ visible, setVisible, user, listAddress, setAddress, setIsUsingNewAddress }) {
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const token = localStorage.getItem("token");
-    //             const res = await axios.get(`${apiCoopUrl}/coupons`, {
-    //                 headers: { "auth-token": `bearer ${token}` }
-    //             });
-    //             const sortedData = res.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    //             console.log(res)
-    //             setTopupHistory(sortedData);
-    //         } catch (err) {
-    //             console.error(
-    //                 "Error fetching user data",
-    //                 err.response?.data || err.message
-    //             );
-    //         }
-    //     };
-    //     fetchData();
-    // }, [apiCoopUrl]);
+    const handleSelectAddress = (addressId) => {
+        setSelectedAddressId(addressId);
+    };
+
+    const handleConfirm = () => {
+        const selectedAddress = listAddress.find(address => address._id === selectedAddressId);
+        if (selectedAddress) {
+            setAddress(selectedAddress);
+        }
+        setIsUsingNewAddress(true);
+        setVisible(false);
+    };
 
     return (
         <>
@@ -42,23 +33,22 @@ function ListlistAddresses({ visible, setVisible, user, listAddress }) {
                 }}
             >
                 <div className='w-22rem'>
-                    {listAddress && (
-                        listAddress.map((listAddress) => (
-                            <div key={listAddress._id} className='flex align-items-center border-bottom-1 surface-border'>
-                                <RadioButton inputId="" name="" value="listAddress._id" />
-                                <div>
-                                    <p className='ml-3'>ที่อยู่ {`${listAddress?.address}, ${listAddress?.district}, ${listAddress?.amphure}, ${listAddress?.province}, ${listAddress?.zipcode}`}</p>
-                                    {user?.mainlistAddress === listAddress._id ? (
-                                        <p className='w-fit px-1 border-1 border-round border-primary'>ค่าเริ่มต้น</p>
-                                    ) : (
-                                        ""
-                                    )}
-                                </div>
-                            </div >
-                        ))
-                    )}
+                    {listAddress && listAddress.map((address) => (
+                        <div key={address._id} className='flex align-items-center border-bottom-1 surface-border'>
+                            <RadioButton
+                                inputId={address._id}
+                                name="address"
+                                value={address._id}
+                                checked={selectedAddressId === address._id}
+                                onChange={() => handleSelectAddress(address._id)}
+                            />
+                            <div>
+                                <p className='ml-3'>ที่อยู่ {`${address?.address}, ${address?.district}, ${address?.amphure}, ${address?.province}, ${address?.zipcode}`}</p>
+                            </div>
+                        </div >
+                    ))}
                     <div className='flex justify-content-end'>
-                        <Button className="w-fit mt-2" label="ยืนยัน" size="small" />
+                        <Button className="w-fit mt-2" label="ยืนยัน" size="small" onClick={handleConfirm} />
                     </div>
                 </div>
             </Dialog>

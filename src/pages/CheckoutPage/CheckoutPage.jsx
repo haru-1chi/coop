@@ -60,7 +60,7 @@ function CheckoutPage() {
                 });
                 setListAddress(res.data.data)
                 const addressList = res.data.data;
-
+                console.log('addressList', addressList)
                 if (user && user.mainAddress) {
                     const matchingAddress = addressList.find((address) => address._id === user.mainAddress);
                     if (matchingAddress) {
@@ -177,7 +177,7 @@ function CheckoutPage() {
             setTotalVat(totalVat);
             setTotalDeliveryPrice(totalDeliveryPrice);
         }
-    }, [selectedItemsCart, sumTotalDeliveries]);
+    }, [selectedItemsCart, sumTotalDeliveries, address]);
 
     const groupByPartner = useMemo(() => {
         return Object.keys(selectedItemsCart).reduce((result, key) => {
@@ -299,13 +299,13 @@ function CheckoutPage() {
                         tel: partner.partner_phone,
                     },
                     to: {
-                        name: address?.customer_name || `${user?.firstname} ${user?.lastname}`,
+                        name: address?.customer_name || user?.name,
                         address: address?.customer_address || address?.address,
-                        district: address?.customer_tambon?.name_th || address?.subdistrict,
-                        state: address?.customer_amphure?.name_th || address?.district,
+                        district: address?.customer_tambon?.name_th || address?.district,
+                        state: address?.customer_amphure?.name_th || address?.amphure,
                         province: address?.customer_province?.name_th || address?.province,
-                        postcode: address?.customer_zipcode || address?.postcode,
-                        tel: address?.customer_telephone || user?.tel,
+                        postcode: address?.customer_zipcode || address?.zipcode,
+                        tel: address?.customer_telephone || user?.phone,
                     },
                     parcel: {
                         name: `สินค้าชิ้นที่ ${productId}`,
@@ -315,7 +315,7 @@ function CheckoutPage() {
                         height: packageOption.package_height,
                     },
                 };
-
+                console.log(packageDetails)
                 const token = localStorage.getItem("token");
                 const response = await axios.post(`${apiUrl}/e-market/express/price`, packageDetails, {
                     headers: { "auth-token": token }
@@ -368,7 +368,7 @@ function CheckoutPage() {
             });
         });
         localStorage.setItem('sumTotalDeliveries', JSON.stringify(sumTotalDeliveries)); //ไว้เช็ต data structure
-    }, [groupByPartner, address]);
+    }, [groupByPartner, address, user]);
 
     const calculatePackageDistribution = (product_qty) => {
         let remainingQty = product_qty;
@@ -385,10 +385,14 @@ function CheckoutPage() {
                         if (count > 0) {
                             distribution.push({
                                 _id: pkg._id,
-                                qty: count,
-                                courier_name: pkg.courier_name,
+                                amount: count,
+                                delivery_company: pkg.courier_name,
                                 package_qty: pkg.package_qty,
-                                price: pkg.price,
+                                package_weight:pkg.package_weight,
+                                package_width:pkg.package_width,
+                                package_length:pkg.package_length,
+                                package_height:pkg.package_height,
+                                delivery_price: pkg.price,
                                 total_price: pkg.price * count
                             });
                             remainingQty -= count * pkg.package_qty;
@@ -439,43 +443,30 @@ function CheckoutPage() {
 
     //ConfirmPayment
     const handleConfirmPayment = () => {
-        const groupByPartner = Object.keys(selectedItemsCart).reduce((result, key) => {
-            const partner = selectedItemsCart[key];
-            const partner_id = partner.partner_id;
-            const partner_name = partner.partner_name;
+        const deliveryDetails = Object.entries(sumTotalDeliveries).map(([partnerId, products]) => {
+            return {
+                partner_id: partnerId,
+                byproducts_detail: Object.entries(products).map(([productId, deliveries]) => {
+                    return {
+                        product_id: productId,
+                        packages: Object.values(deliveries).map(delivery => ({
+                            package_qty: delivery.package_qty,
+                            package_weight: delivery.package_weight,
+                            package_width: delivery.package_width,
+                            package_length: delivery.package_length,
+                            package_height: delivery.package_height,
+                            delivery_company: delivery.delivery_company,
+                            delivery_price: delivery.delivery_price,
+                            delivery_totalprice: delivery.total_price,
+                            amount: delivery.amount,
+                        }))
+                    };
+                })
+            };
+        });
 
-            if (!result[partner_id]) {
-                result[partner_id] = {
-                    partner_name: partner_name,
-                    products: []
-                };
-            }
-
-            partner.products.forEach(product => {
-                const product_id = product.product_id;
-                // const packageOptions = selectedPackageOptions?.[partner_id]?.[product_id]?.product_package_options || [];
-                // const selectedCompany = selectedDeliveryCompany?.[partner_id]?.[product_id]?.delivery_detail || "";
-
-                result[partner_id].products.push({
-                    product_id: product_id,
-                    product_name: product.product_name,
-                    // package_qty: packageOptions.package_qty || product.product_qty,
-                    // package_weight: packageOptions.package_weight || "",
-                    // package_width: packageOptions.package_width || "",
-                    // package_length: packageOptions.package_length || "",
-                    // package_height: packageOptions.package_height || "",
-                    // delivery_company: selectedCompany.courier_name || "",
-                    // delivery_price: selectedCompany.price || ""
-                });
-            });
-
-            return result;
-        }, {});
-
-        // Now construct orderDetails using groupByPartner
         const orderDetails = {
-            // partner_id: selectedItemsCart,
-            amountPayment: totalPayable, // Total payable for all bills
+            amountPayment: totalPayable,
             customer_id: user?._id,
             customer_name: address?.customer_name || user?.name,
             customer_address: address?.customer_address || address?.address,
@@ -484,29 +475,13 @@ function CheckoutPage() {
             customer_province: address?.customer_province?.name_th || address?.province,
             customer_zipcode: address?.customer_zipcode || address?.zipcode,
             customer_telephone: address?.customer_telephone || user.phone,
-
-            // Add delivery_detail structured by partner and their respective products
-            delivery_detail: Object.entries(groupByPartner).map(([partnerId, partnerData]) => ({
-                partner_id: partnerId,
-                partner_name: partnerData.partner_name,
-                byproducts_detail: partnerData.products.map(product => ({
-                    product_id: product.product_id,
-                    delivery_company: product.delivery_company,
-                    package_qty: product.package_qty,
-                    package_weight: product.package_weight,
-                    package_width: product.package_width,
-                    package_length: product.package_length,
-                    package_height: product.package_height,
-                    delivery_price: product.delivery_price
-                }))
-            }))
+            delivery_detail: deliveryDetails
         };
 
-        // Log to check the structure of delivery_detail
         console.log(orderDetails);
 
-        // placeCartDetail(orderDetails);
-        // navigate("/PaymentPage");
+        placeCartDetail(orderDetails);
+        navigate("/PaymentPage");
     };
 
 
@@ -543,6 +518,8 @@ function CheckoutPage() {
                                     setVisible={setAddressVisible}
                                     user={user}
                                     listAddress={listAddress}
+                                    setAddress={setAddress}
+                                    setIsUsingNewAddress={setIsUsingNewAddress}
                                 />
                             </div>
 

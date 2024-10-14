@@ -222,6 +222,13 @@ function ProductPage() {
                 <p className="mt-2 p-0 font-semibold text-900">หมวดหมู่ : {product.product_category}</p>
                 <h3 className="font-semibold pb-2 border-bottom-1 surface-border">{product.product_name}</h3>
                 <p dangerouslySetInnerHTML={{ __html: product.product_detail }}></p>
+                <div>
+                  <p className="text-center font-semibold">เอกสารกำกับสินค้า</p>
+                  <img
+                      src={product?.product_imagedoc ? apiProductUrl + product?.product_imagedoc : img_placeholder}
+                      className="w-12"
+                    />
+                </div>
               </div>
               <div className="flex justify-content-end">
 

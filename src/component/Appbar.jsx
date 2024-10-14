@@ -346,7 +346,7 @@ function Appbar() {
         <div className="pt-3 pr-3 pl-3">
           <div className="flex justify-content-end mb-2">
             {/* ----- [ Production ] ----- */}
-            <a className="px-2 border-right-1 cursor-pointer" onClick={() => window.open('https://partner.ddscservices.com/', '_blank')}>Seller Center</a>
+            {/* <a className="px-2 border-right-1 cursor-pointer" onClick={() => window.open('https://partner.ddscservices.com/', '_blank')}>Seller Center</a> */}
 
             {/* ----- [ Develop ] ----- */}
             <a className="px-2 border-right-1 cursor-pointer" onClick={() => window.open('http://partner.nbadigitalsuccessmore.com/', '_blank')}>Seller Center</a>

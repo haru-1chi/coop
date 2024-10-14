@@ -109,27 +109,44 @@ function StatusShippingPage({ orderId }) {
                                             <>
                                                 <div className="flex justify-content-between bg-primary-100 my-2">
                                                     <p className="my-1 p-0">รายละเอียดการจัดส่ง</p>
-                                                    <p className="my-1 p-0">หมายเลขติดตามพัสดุ: {deliveryDetail.tracking}</p>
                                                 </div>
 
-                                                <div>
-                                                    <div className="flex justify-content-between">
-                                                        <p className="m-0 p-0">จัดส่งโดยขนส่ง:</p>
-                                                        <p className="m-0 p-0">{deliveryDetail.delivery_company}</p>
+                                                {deliveryDetail.packages.map((packageDetail, idx) => (
+                                                    <div key={idx}>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">หมายเลขติดตามพัสดุ:</p>
+                                                            <p className="m-0 p-0">{packageDetail.tracking || 'รอผู้ขายจัดส่ง'}</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">จัดส่งโดยขนส่ง:</p>
+                                                            <p className="m-0 p-0">{packageDetail.delivery_company}</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">น้ำหนัก:</p>
+                                                            <p className="m-0 p-0">{packageDetail.package_weight} กรัม</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">ขนาดบรรจุ:</p>
+                                                            <p className="m-0 p-0">{packageDetail.package_qty} ชิ้น</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">ขนาดกล่องพัสดุ:</p>
+                                                            <p className="m-0 p-0">กว้าง {packageDetail.package_width} ซม. * ยาว {packageDetail.package_length} ซม. * สูง {packageDetail.package_height} ซม.</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">ค่าส่งต่อกล่อง:</p>
+                                                            <p className="m-0 p-0 font-semibold">฿{packageDetail.delivery_price}</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">จำนวนพัสดุที่ต้องส่ง:</p>
+                                                            <p className="m-0 p-0">{packageDetail.amount} กล่อง</p>
+                                                        </div>
+                                                        <div className="flex justify-content-between">
+                                                            <p className="m-0 p-0">รวมค่าส่งทั้งหมด:</p>
+                                                            <p className="m-0 p-0 font-semibold">฿{packageDetail.delivery_totalprice}</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex justify-content-between">
-                                                        <p className="m-0 p-0">ขนาดกล่องพัสดุ:</p>
-                                                        <p className="m-0 p-0">กว้าง {deliveryDetail.package_width} ซม. * ยาว {deliveryDetail.package_length} ซม. * สูง {deliveryDetail.package_height} ซม.</p>
-                                                    </div>
-                                                    <div className="flex justify-content-between">
-                                                        <p className="m-0 p-0">น้ำหนัก:</p>
-                                                        <p className="m-0 p-0">{deliveryDetail.package_weight} กรัม</p>
-                                                    </div>
-                                                    <div className="flex justify-content-between">
-                                                        <p className="m-0 p-0">ค่าส่ง:</p>
-                                                        <p className="m-0 p-0 font-semibold">฿{deliveryDetail.delivery_price}</p>
-                                                    </div>
-                                                </div>
+                                                ))}
                                             </>
                                         ) : (
                                             <p className="m-0 p-0">ไม่มีข้อมูลการจัดส่ง</p>
