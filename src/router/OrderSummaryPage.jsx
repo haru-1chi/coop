@@ -32,7 +32,7 @@ function TemplateDemo() {
 
     return (
         <div>
-            <CalculatePackage/>
+            {/* <CalculatePackage/> */}
             <h2>Local Storage Data</h2>
             <pre>{JSON.stringify(storageData, null, 2)}</pre> {/* Pretty print JSON */}
         </div>

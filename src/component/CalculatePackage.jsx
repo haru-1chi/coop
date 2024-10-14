@@ -1,8 +1,7 @@
-// import React, { useEffect, useState } from 'react';
+// import React, { useState } from 'react';
 
 // function CalculatePackage() {
 //     const [productQty, setProductQty] = useState(0);
-//     const [selectedOption, setSelectedOption] = useState('');
 
 //     const packageGroup = [
 //         { id: 1, package_qty: 1 },
@@ -23,20 +22,11 @@
 //     const calculatePackageDistribution = () => {
 //         let remainingQty = productQty;
 //         const distribution = [];
-//         const selectedPackage = selectedOption ? packageGroup.find(pkg => pkg.id === Number(selectedOption)) : null;
 
-//         if (selectedPackage) {
-//             const selectedCount = Math.floor(remainingQty / selectedPackage.package_qty);
-//             if (selectedCount > 0) {
-//                 distribution.push({ id: selectedPackage.id, qty: selectedCount });
-//                 remainingQty -= selectedCount * selectedPackage.package_qty;
-//             } else if (remainingQty < selectedPackage.package_qty) {
-//                 distribution.push({ id: selectedPackage.id, qty: 1 });
-//                 remainingQty = 0;
-//             }
-//         }
-
+//         // Sort packages by descending order of package quantity
 //         const sortedPackages = [...packageGroup].sort((a, b) => b.package_qty - a.package_qty);
+
+//         // Distribute product quantity among available packages
 //         for (const pkg of sortedPackages) {
 //             if (remainingQty >= pkg.package_qty) {
 //                 const count = Math.floor(remainingQty / pkg.package_qty);
@@ -52,6 +42,7 @@
 //         const distribution = calculatePackageDistribution();
 //         let totalCost = 0;
 
+//         // Calculate total delivery cost based on the distribution
 //         for (const { id, qty } of distribution) {
 //             const deliveryPrice = deliveryGroup.find(del => del.packageGroup_id === id)?.delivery_price || 0;
 //             totalCost += deliveryPrice * qty;
@@ -70,6 +61,7 @@
 
 //         return `For a total of ${productQty} products: ${breakdown}. Total Cost: ${calculateTotalCost()}฿`;
 //     };
+
 //     return (
 //         <div style={{ padding: '20px', fontFamily: 'Arial' }}>
 //             <h2>Packaging Cost Calculator</h2>
@@ -85,16 +77,10 @@
 //             </div>
 
 //             <div style={{ marginTop: '20px' }}>
-//                 <h4>Select Package Option:</h4>
+//                 <h4>all Package Option have:</h4>
 //                 {packageGroup.map(pkg => (
 //                     <div key={pkg.id}>
 //                         <label>
-//                             <input
-//                                 type="radio"
-//                                 value={pkg.id}
-//                                 checked={selectedOption === String(pkg.id)}
-//                                 onChange={(e) => setSelectedOption(e.target.value)}
-//                             />
 //                             Package for {pkg.package_qty} product(s) (Delivery Cost: {deliveryGroup.find(del => del.packageGroup_id === pkg.id)?.delivery_price}฿)
 //                         </label>
 //                     </div>
@@ -109,10 +95,10 @@
 //                 )}
 //             </div>
 //         </div>
-//     )
+//     );
 // }
 
-// export default CalculatePackage
+// export default CalculatePackage;
 
 // // in checkout page
 // // if product_qty = 7
@@ -130,7 +116,7 @@ import axios from "axios";
 
 function CalculatePackage({ productQty, selectedOption, test, setTest }) {
     const apiUrl = import.meta.env.VITE_REACT_APP_API_PLATFORM;
-    const [user, setUser] = useState(null);
+    // const [user, setUser] = useState(null);
     const [address, setAddress] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingState, setLoadingState] = useState({});
@@ -141,23 +127,23 @@ function CalculatePackage({ productQty, selectedOption, test, setTest }) {
     const [allPackageDeliveries, setAllPackageDeliveries] = useState({});
 
     const apiProductUrl = import.meta.env.VITE_REACT_APP_API_PARTNER;
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const token = localStorage.getItem("token");
-            try {
-                const res = await axios.post(`${apiUrl}/me`, null, {
-                    headers: { "auth-token": token }
-                });
-                setUser(res.data.data);
-                setAddress(res.data.data.current_address);
-            } catch (err) {
-                console.error("Error fetching user data", err.response?.data || err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUserData();
-    }, [apiUrl]);
+    // useEffect(() => {
+    //     const fetchUserData = async () => {
+    //         const token = localStorage.getItem("token");
+    //         try {
+    //             const res = await axios.post(`${apiUrl}/me`, null, {
+    //                 headers: { "auth-token": token }
+    //             });
+    //             setUser(res.data.data);
+    //             setAddress(res.data.data.current_address);
+    //         } catch (err) {
+    //             console.error("Error fetching user data", err.response?.data || err.message);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchUserData();
+    // }, [apiUrl]);
 
     useEffect(() => {
         if (Object.keys(selectedItemsCart).length > 0) {
