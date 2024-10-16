@@ -112,7 +112,7 @@ function StatusShippingPage({ orderId }) {
                                                 </div>
 
                                                 {deliveryDetail.packages.map((packageDetail, idx) => (
-                                                    <div key={idx}>
+                                                    <div key={idx} className="border-bottom-1 surface-border">
                                                         <div className="flex justify-content-between">
                                                             <p className="m-0 p-0">หมายเลขติดตามพัสดุ:</p>
                                                             <p className="m-0 p-0">{packageDetail.tracking || 'รอผู้ขายจัดส่ง'}</p>

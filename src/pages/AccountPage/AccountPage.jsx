@@ -27,24 +27,24 @@ function AccountPage() {
         { id: 'contactUs', label: 'ติดต่อเรา' },
     ];
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            const user = localStorage.getItem("user");
+    const fetchOrders = async () => {
+        const user = localStorage.getItem("user");
 
-            if (user) {
-                const parsedUser = JSON.parse(user);
-                const user_id = parsedUser._id;
-                try {
-                    const res = await axios.get(`${apiUrl}/orderproduct/bycustomer/${user_id}`);
-                    setUserOrders(res.data.data);
-                } catch (err) {
-                    console.error("Error fetching user data", err.response?.data || err.message);
-                }
-            } else {
-                console.error("No user found in localStorage");
+        if (user) {
+            const parsedUser = JSON.parse(user);
+            const user_id = parsedUser._id;
+            try {
+                const res = await axios.get(`${apiUrl}/orderproduct/bycustomer/${user_id}`);
+                setUserOrders(res.data.data);
+            } catch (err) {
+                console.error("Error fetching user data", err.response?.data || err.message);
             }
-        };
+        } else {
+            console.error("No user found in localStorage");
+        }
+    };
 
+    useEffect(() => {
         fetchOrders();
     }, [apiUrl]);
 
@@ -101,6 +101,35 @@ function AccountPage() {
     }, [location.state]);
 
     const handleRevertClick = () => setSelectedOrderId(null);
+
+    const handleReceived = async (order_id, e) => {
+        e.stopPropagation();
+        try {
+            if (!order_id) {
+                console.error("Order ID is missing");
+                return;
+            }
+
+            const response = await axios.put(`${apiUrl}/orderproduct/receive/${order_id}`);
+            if (response.status === 200 && response.data && response.data.status) {
+                console.log("Order received successfully:", response.data);
+
+                // const updatedStatusDetail = [
+                //     ...statusDetails,
+                //     { status: statusEvents.Received.value, date: new Date().toISOString() }
+                // ];
+                
+                // setStatusDetails(updatedStatusDetail);
+
+                await fetchOrders();
+                
+            } else {
+                console.log(response.data.message || "Failed to receive the order");
+            }
+        } catch (error) {
+            console.error("Error while receiving the order:", error?.response?.data?.message || error.message);
+        }
+    };
 
     const StatusBar = () => (
         <ul className='navmenu w-full flex gap-4 overflow-scroll white-space-nowrap justify-content-between font-semibold p-0 px-4 m-0 text-center'>
@@ -235,7 +264,7 @@ function AccountPage() {
                         <p className="m-0 p-0 pr-2 font-semibold text-900">฿{order.alltotal?.toLocaleString('en-US')}</p>
                     </div>
                     <div className='w-full flex justify-content-end'>
-                        {latestStatus === 'จัดส่งแล้ว' ? <Button label='ฉันได้รับสินค้าแล้ว' /> : ("")}
+                        {latestStatus === 'จัดส่งแล้ว' ? <Button label='ฉันได้รับสินค้าแล้ว' onClick={(e) => handleReceived(order?._id, e)}/> : ("")}
                     </div>
                 </div>
                 {/* responsive */}
@@ -288,7 +317,7 @@ function AccountPage() {
                         <p className="m-0 ml-1 p-0 text-right font-semibold">฿{order.alltotal?.toLocaleString('en-US')}</p>
                     </div>
                     <div className='w-full flex justify-content-end'>
-                        {latestStatus === 'จัดส่งแล้ว' ? <Button label='ฉันได้รับสินค้าแล้ว' /> : ("")}
+                        {latestStatus === 'จัดส่งแล้ว' ? <Button label='ฉันได้รับสินค้าแล้ว' onClick={(e) => handleReceived(order?._id, e)} /> : ("")}
                     </div>
                     {/* <div className='w-full text-right'>
                         <p className="m-0 pt-3 text-right font-semibold text-primary text-l">{order.net_price?.toLocaleString('en-US')} ฿</p>

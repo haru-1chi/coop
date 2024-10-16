@@ -234,10 +234,6 @@ function CheckoutPage() {
                 ...allPackageOptions
             }));
         }
-        localStorage.setItem('allPackageOptions', JSON.stringify(allPackageOptions));
-        localStorage.setItem('allPackageDeliveries', JSON.stringify(allPackageDeliveries));
-        localStorage.setItem('sumTotalDeliveries', JSON.stringify(sumTotalDeliveries));
-
     }, [setAllPackageOptions]);
 
 
@@ -331,7 +327,7 @@ function CheckoutPage() {
                                 ...prevState[partner_id]?.[productId],
                                 [packageId]: {
                                     ...packageOption,
-                                    courier_name: deliveryOptions[0].courier_name,
+                                    courier_code: deliveryOptions[0].courier_code,
                                     price: deliveryOptions[0].price
                                 }
                             }
@@ -342,6 +338,9 @@ function CheckoutPage() {
                     setError(response.data.message || "Order failed");
                 }
             }
+            localStorage.setItem('allPackageOptions', JSON.stringify(allPackageOptions));
+            localStorage.setItem('allPackageDeliveries', JSON.stringify(allPackageDeliveries));
+            localStorage.setItem('sumTotalDeliveries', JSON.stringify(sumTotalDeliveries));
         } catch (error) {
             console.log(error)
         }
@@ -353,54 +352,55 @@ function CheckoutPage() {
             const { products } = partner;
 
             products.forEach((product) => {
-                const distribution = calculatePackageDistribution(product.product_qty);
+                const distribution = calculatePackageDistribution(partner_id, product.product_id, product.product_qty);
 
                 setSumTotalDeliveries(prevState => ({
                     ...prevState,
                     [partner_id]: {
                         ...prevState[partner_id],
-                        [product.product_id]: {
-                            ...prevState[partner_id]?.[product.product_id],
-                            ...distribution
-                        }
+                        [product.product_id]: distribution.reduce((acc, pkg, index) => {
+                            acc[index] = pkg;
+                            return acc;
+                        }, {})
                     }
                 }));
             });
         });
-        localStorage.setItem('sumTotalDeliveries', JSON.stringify(sumTotalDeliveries)); //ไว้เช็ต data structure
+        localStorage.setItem('sumTotalDeliveries', JSON.stringify(sumTotalDeliveries)); // Save data structure
     }, [groupByPartner, address, user]);
 
-    const calculatePackageDistribution = (product_qty) => {
+    const calculatePackageDistribution = (partner_id, product_id, product_qty) => {
         let remainingQty = product_qty;
         const distribution = [];
 
-        Object.keys(allPackageDeliveries).forEach(partnerId => {
-            Object.keys(allPackageDeliveries[partnerId]).forEach(productId => {
-                const packageOptions = allPackageDeliveries[partnerId][productId];
-                const sortedPackages = Object.values(packageOptions).sort((a, b) => b.package_qty - a.package_qty);
+        const packageOptions = allPackageDeliveries[partner_id]?.[product_id]; // Get packages for the specific product
+        if (!packageOptions) {
+            return [];
+        }
 
-                for (const pkg of sortedPackages) {
-                    if (remainingQty >= pkg.package_qty) {
-                        const count = Math.floor(remainingQty / pkg.package_qty);
-                        if (count > 0) {
-                            distribution.push({
-                                _id: pkg._id,
-                                amount: count,
-                                delivery_company: pkg.courier_name,
-                                package_qty: pkg.package_qty,
-                                package_weight:pkg.package_weight,
-                                package_width:pkg.package_width,
-                                package_length:pkg.package_length,
-                                package_height:pkg.package_height,
-                                delivery_price: pkg.price,
-                                total_price: pkg.price * count
-                            });
-                            remainingQty -= count * pkg.package_qty;
-                        }
-                    }
+        const sortedPackages = Object.values(packageOptions).sort((a, b) => b.package_qty - a.package_qty);
+
+        for (const pkg of sortedPackages) {
+            if (remainingQty >= pkg.package_qty) {
+                const count = Math.floor(remainingQty / pkg.package_qty);
+                if (count > 0) {
+                    distribution.push({
+                        _id: pkg._id,
+                        amount: count,
+                        delivery_company: pkg.courier_code,
+                        package_qty: pkg.package_qty,
+                        package_weight: pkg.package_weight,
+                        package_width: pkg.package_width,
+                        package_length: pkg.package_length,
+                        package_height: pkg.package_height,
+                        delivery_price: pkg.price,
+                        total_price: pkg.price * count
+                    });
+                    remainingQty -= count * pkg.package_qty;
                 }
-            });
-        });
+            }
+        }
+
         return distribution;
     };
 
@@ -408,38 +408,38 @@ function CheckoutPage() {
         const distribution = calculatePackageDistribution(product_qty);
         let totalCost = 0;
 
-        distribution.forEach(({ price, qty }) => {
-            totalCost += price * qty;
+        distribution.forEach(({ delivery_price, amount }) => {
+            totalCost += delivery_price * amount;
         });
 
         return totalCost;
     };
 
-    // const getBreakdownMessage = (product_qty) => {
-    //     const distribution = calculatePackageDistribution(product_qty);
-    //     // calculateTotalCost(product_qty)
-    //     if (distribution.length === 0) return <p>ยังไม่ได้เลือกกล่องพัสดุของทางร้าน</p>;
-
-    //     return (
-    //         <div className='flex justify-content-end'>
-    //             <div>
-    //                 {distribution.map(({ package_qty, qty, courier_name, price }, index) => (
-    //                     <div className="w-20rem mt-2" key={index}>
-    //                         <div className=" grid grid-nogutter justify-content-end align-items-center">
-    //                             <p className=" col m-0 text-right bg-primary-200 border-none border-round-lg border-noround-right border-noround-bottom">ใช้กล่องขนาดบรรจุ {package_qty} ชิ้น</p>
-    //                             <p className=" col-4 m-0 text-right bg-primary-100  border-none border-round-lg border-noround-left border-noround-bottom">x{qty}</p>
-    //                         </div>
-    //                         <div className="grid grid-nogutter justify-content-end align-items-center">
-    //                             <p className="col m-0 text-right bg-primary-100">จัดส่งโดย {courier_name}</p>
-    //                             <p className="col-4 m-0 font-semibold text-right bg-primary-100">รวม ฿{price * qty}</p>
-    //                         </div>
-    //                     </div>
-    //                 ))}
-    //                 <p className="m-0 mt-2 font-semibold text-right">รวมค่าจัดส่งทั้งหมดของสินค้านี้ ฿{calculateTotalCost(product_qty)}</p>
-    //             </div>
-    //         </div>
-    //     );
-    // };
+    const getBreakdownMessage = (partner_id, product_id, product_qty) => {
+        const distribution = calculatePackageDistribution(partner_id, product_id, product_qty);
+        // calculateTotalCost(product_qty)
+        if (distribution.length === 0) return <p>ยังไม่ได้เลือกกล่องพัสดุของทางร้าน</p>;
+        console.log(distribution)
+        return (
+            <div className='flex justify-content-end'>
+                <div>
+                    {distribution.map(({ package_qty, amount, delivery_company, delivery_price }, index) => (
+                        <div className="w-20rem mt-2" key={index}>
+                            <div className=" grid grid-nogutter justify-content-end align-items-center">
+                                <p className=" col m-0 text-right bg-primary-200 border-none border-round-lg border-noround-right border-noround-bottom">ใช้กล่องขนาดบรรจุ {package_qty} ชิ้น</p>
+                                <p className=" col-4 m-0 text-right bg-primary-100  border-none border-round-lg border-noround-left border-noround-bottom">x{amount}</p>
+                            </div>
+                            <div className="grid grid-nogutter justify-content-end align-items-center">
+                                <p className="col m-0 text-right bg-primary-100">จัดส่งโดย {delivery_company}</p>
+                                <p className="col-4 m-0 font-semibold text-right bg-primary-100">รวม ฿{delivery_price * amount}</p>
+                            </div>
+                        </div>
+                    ))}
+                    <p className="m-0 mt-2 font-semibold text-right">รวมค่าจัดส่งทั้งหมดของสินค้านี้ ฿{calculateTotalCost(partner_id, product_id, product_qty)}</p>
+                </div>
+            </div>
+        );
+    };
 
     //ConfirmPayment
     const handleConfirmPayment = () => {
@@ -582,7 +582,7 @@ function CheckoutPage() {
                                                 </div>
 
                                                 {/* ตัวเลือกขนาดพัสดุ */}
-                                                {/* {
+                                                {
                                                     product.product_package_options.length > 0 && (
                                                         <>
                                                             <div className=" pt-3">
@@ -617,10 +617,10 @@ function CheckoutPage() {
                                                                     ))}
                                                             </div>
 
-                                                            {getBreakdownMessage(product.product_qty)}
+                                                            {getBreakdownMessage(partner_id, product.product_id,product.product_qty)}
 
                                                         </>
-                                                    )} */}
+                                                    )}
                                             </div>
                                         ))}
                                         <div className="border-top-1 surface-border pt-3">

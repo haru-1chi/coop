@@ -152,20 +152,17 @@ function QRPage() {
                                 package_length: packageDetail.package_length,
                                 package_height: packageDetail.package_height,
                                 delivery_price: packageDetail.delivery_price,
-                                delivery_totalprice: packageDetail.delivery_totalprice, // Assuming `total_price` is part of the package
+                                delivery_totalprice: packageDetail.delivery_totalprice,
                                 amount: packageDetail.amount
                             }))
                         )
                     );
 
-                const totaldeliveryPrice = deliveryToPurchase.reduce((total, delivery) => total + delivery.delivery_totalprice, 0);
+                const groupedDeliveries = deliveryToPurchase.reduce((acc, delivery) => {
+                    const existingProduct = acc.find(item => item.product_id === delivery.product_id);
 
-                const newOrder = {
-                    partner_id: partner.partner_id,
-                    product: productsToPurchase,
-                    delivery_detail: deliveryToPurchase.map(delivery => ({
-                        product_id: delivery.product_id,
-                        packages: [{
+                    if (existingProduct) {
+                        existingProduct.packages.push({
                             package_qty: delivery.package_qty,
                             package_weight: delivery.package_weight,
                             package_width: delivery.package_width,
@@ -175,7 +172,35 @@ function QRPage() {
                             delivery_price: delivery.delivery_price,
                             delivery_totalprice: delivery.delivery_totalprice,
                             amount: delivery.amount,
-                        }]
+                        });
+                    } else {
+                        acc.push({
+                            product_id: delivery.product_id,
+                            packages: [{
+                                package_qty: delivery.package_qty,
+                                package_weight: delivery.package_weight,
+                                package_width: delivery.package_width,
+                                package_length: delivery.package_length,
+                                package_height: delivery.package_height,
+                                delivery_company: delivery.delivery_company,
+                                delivery_price: delivery.delivery_price,
+                                delivery_totalprice: delivery.delivery_totalprice,
+                                amount: delivery.amount,
+                            }]
+                        });
+                    }
+
+                    return acc;
+                }, []);
+
+                const totaldeliveryPrice = deliveryToPurchase.reduce((total, delivery) => total + delivery.delivery_totalprice, 0);
+
+                const newOrder = {
+                    partner_id: partner.partner_id,
+                    product: productsToPurchase,
+                    delivery_detail: groupedDeliveries.map(delivery => ({
+                        product_id: delivery.product_id,
+                        packages: delivery.packages
                     })),
                     customer_id: cartDetails.customer_id,
                     customer_name: cartDetails.customer_name,
@@ -201,58 +226,58 @@ function QRPage() {
                 };
                 console.log(newOrder)
                 localStorage.setItem('newOrder', JSON.stringify(newOrder));
-                // if (totalPayable > user.coop_coupon) {
-                //     setError(`จำนวนเงินไม่เพียงพอ กรุณาเติมเงินให้เพียงพอแล้วทำรายการอีกครั้ง`);
-                //     return;
-                // }
-                // console.log(newOrder)
-                // const orderResponse = await axios.post(`${apiUrl}/orderproduct`, newOrder);
+                if (totalPayable > user.coop_coupon) {
+                    setError(`จำนวนเงินไม่เพียงพอ กรุณาเติมเงินให้เพียงพอแล้วทำรายการอีกครั้ง`);
+                    return;
+                }
 
-                // if (orderResponse.data && orderResponse.data.status) {
-                //     console.log("Order successful for partner:", partner.partner_name, orderResponse.data);
+                const orderResponse = await axios.post(`${apiUrl}/orderproduct`, newOrder);
 
-                //     const useCoupon = {
-                //         ref_code: orderResponse.data.data.orderref,
-                //         ref_type: "e-market",
-                //         amount: totalPayable,
-                //         user_id: cartDetails.customer_id,
-                //     };
+                if (orderResponse.data && orderResponse.data.status) {
+                    console.log("Order successful for partner:", partner.partner_name, orderResponse.data);
 
-                //     console.log(useCoupon)
-                //     try {
-                //         const useCouponResponse = await axios.post(`${apiCoopUrl}/coupons/use`, useCoupon, {
-                //             headers: { "auth-token": `bearer ${token}` },
-                //         });
-                //         console.log(useCouponResponse.data);
-                //     } catch (error) {
-                //         throw new Error("Coupon use failed.");
-                //     }
+                    const useCoupon = {
+                        ref_code: orderResponse.data.data.orderref,
+                        ref_type: "e-market",
+                        amount: totalPayable,
+                        user_id: cartDetails.customer_id,
+                    };
 
-                //     if (cartDetails.payment === 'บัญชีธนาคาร') {
-                //         try {
-                //             setIsLoading(true);
-                //             const uploadResponse = await axios.put(`${apiUrl}/orderproduct/addslippayment/${orderResponse.data.data._id}`, formData, {
-                //                 headers: {
-                //                     'Content-Type': 'multipart/form-data',
-                //                 },
-                //             });
-                //             console.log('Upload successful:', uploadResponse.data);
-                //         } catch (error) {
-                //             console.error('Error uploading file:', error);
-                //         } finally {
-                //             setIsLoading(false);
-                //         }
-                //     }
-                // } else {
-                //     setError(orderResponse.data.message || "Order failed");
-                //     break;
-                // }
+                    console.log(useCoupon)
+                    try {
+                        const useCouponResponse = await axios.post(`${apiCoopUrl}/coupons/use`, useCoupon, {
+                            headers: { "auth-token": `bearer ${token}` },
+                        });
+                        console.log(useCouponResponse.data);
+                    } catch (error) {
+                        throw new Error("Coupon use failed.");
+                    }
+
+                    if (cartDetails.payment === 'บัญชีธนาคาร') {
+                        try {
+                            setIsLoading(true);
+                            const uploadResponse = await axios.put(`${apiUrl}/orderproduct/addslippayment/${orderResponse.data.data._id}`, formData, {
+                                headers: {
+                                    'Content-Type': 'multipart/form-data',
+                                },
+                            });
+                            console.log('Upload successful:', uploadResponse.data);
+                        } catch (error) {
+                            console.error('Error uploading file:', error);
+                        } finally {
+                            setIsLoading(false);
+                        }
+                    }
+                } else {
+                    setError(orderResponse.data.message || "Order failed");
+                    break;
+                }
             }
-            // clearCart(cart, selectedItemsCart);
-            // clearCartDetails();
-            // clearSelectedItemsCart();
-            // window.location.href = '/PaymentSuccessfully';
-            // navigate("/PaymentSuccessfully");
+            clearCart(cart, selectedItemsCart);
+            clearCartDetails();
+            clearSelectedItemsCart();
+            window.location.href = '/PaymentSuccessfully';
+            navigate("/PaymentSuccessfully");
         } catch (error) {
             console.error("Order error:", error.response?.data || error.message);
             setError(error.response?.data?.message || "An error occurred. Please try again.");
