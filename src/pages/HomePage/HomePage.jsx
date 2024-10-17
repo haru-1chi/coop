@@ -150,6 +150,35 @@ function HomePage() {
           </div>
 
         </div>
+       
+        <div className="m-0 lg:m-2">
+          <div className="bg-section-new-product lg:border-round-2xl flex justify-content-center">
+            <img
+              className="w-full lg:w-8"
+              src="https://www.makro.pro/_next/image?url=https%3A%2F%2Fstrapi-cdn.mango-prod.siammakro.cloud%2Fuploads%2FFlash_Sale_Fresh_Middle_TH_016100_8a83bd308a.png&w=1200&q=90"
+              alt=""
+            />
+          </div>
+          <div className="my-2 mx-3 md:mx-6 flex justify-content-between">
+            <h2 className="m-0">สินค้าสหกรณ์</h2>
+            <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: 'coop' } })}>
+              <p className="m-0">ดูเพิ่มเติม</p><i className="pi pi-chevron-right"></i>
+            </div>
+          </div>
+
+          <Products data={coopData} startIndex={5} />
+        </div>
+
+        <div className="hidden mt-5">
+          <div className="flex align-items-center justify-content-between pl-3 pr-3">
+            <span>
+              <>ไอเท็มฮิต</>
+            </span>
+            <Link to="/List-Product" className="no-underline text-900">ดูเพิ่มเติม <i className="pi pi-angle-right"></i></Link>
+          </div>
+          <Products data={data} startIndex={0} />
+        </div>
+
         <div className="mx-0 lg:mx-2">
           <div className="bg-section-product lg:border-round-2xl flex justify-content-center">
             <img
@@ -168,33 +197,7 @@ function HomePage() {
           <Products data={data} startIndex={0} />
         </div>
 
-        <div className="hidden mt-5">
-          <div className="flex align-items-center justify-content-between pl-3 pr-3">
-            <span>
-              <>ไอเท็มฮิต</>
-            </span>
-            <Link to="/List-Product" className="no-underline text-900">ดูเพิ่มเติม <i className="pi pi-angle-right"></i></Link>
-          </div>
-          <Products data={data} startIndex={0} />
-        </div>
-
-        <div className="m-0 lg:m-2">
-          <div className="bg-section-new-product lg:border-round-2xl flex justify-content-center">
-            <img
-              className="w-full lg:w-8"
-              src="https://www.makro.pro/_next/image?url=https%3A%2F%2Fstrapi-cdn.mango-prod.siammakro.cloud%2Fuploads%2FFlash_Sale_Fresh_Middle_TH_016100_8a83bd308a.png&w=1200&q=90"
-              alt=""
-            />
-          </div>
-          <div className="my-2 mx-3 md:mx-6 flex justify-content-between">
-            <h2 className="m-0">สินค้าสหกรณ์</h2>
-            <div className="flex align-items-center cursor-pointer" onClick={() => navigate("/List-Product", { state: { providerName: 'coop' } })}>
-              <p className="m-0">ดูเพิ่มเติม</p><i className="pi pi-chevron-right"></i>
-            </div>
-          </div>
-
-          <Products data={coopData} startIndex={5} />
-        </div>
+        
         <div className="hidden mt-4 pl-3 pr-3">
           <span>
             <b>เปิดตัวแบรนด์ใหม่</b>

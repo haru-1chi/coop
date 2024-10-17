@@ -142,6 +142,7 @@ function ShopCategriesSelected() {
                                                                 src={`${product.product_image ? apiProductUrl + product.product_image : product.product_subimage1 ? apiProductUrl + product.product_subimage1 : product.product_subimage2 ? apiProductUrl + product.product_subimage2 : product.product_subimage3 ? apiProductUrl + product.product_subimage3 : img_placeholder}`}
                                                                 alt={product.product_name}
                                                                 className="w-12 border-1 surface-border"
+                                                                onError={(e) => { e.target.src = img_placeholder; }}
                                                             />
                                                         </div>
                                                     </Link>

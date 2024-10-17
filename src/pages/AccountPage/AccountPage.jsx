@@ -235,6 +235,7 @@ function AccountPage() {
                                             width={90}
                                             height={90}
                                             className='border-1 border-round-lg surface-border'
+                                            onError={(e) => { e.target.src = img_placeholder; }}
                                         />
                                         <div className="flex flex-column ml-3">
                                             <span className="mb-1 font-semibold">{product.product_name}</span>
@@ -291,6 +292,7 @@ function AccountPage() {
                                             width={90}
                                             height={90}
                                             className='border-1 border-round-lg surface-border'
+                                            onError={(e) => { e.target.src = img_placeholder; }}
                                         />
                                         <div className='w-full flex flex-column justify-content-between ml-3'>
                                             <div className="flex flex-column">

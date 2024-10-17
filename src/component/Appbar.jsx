@@ -23,7 +23,8 @@ import TopupHistory from "./TopupHistory";
 import ContactUs from "./ContactUs";
 import CategoriesIcon from "./CategoriesIcon";
 import GenerateCategories from "./GenerateCategories";
-import Logo from "../assets/tossaganLogo.png";
+import Logo from "../assets/coopLogo.png";
+import tossagunsLogo from "../assets/tossagunsLogo.png";
 import img_placeholder from '../assets/img_placeholder.png';
 //
 function Appbar() {
@@ -241,9 +242,11 @@ function Appbar() {
   );
 
   const customHeader = (
-    <div className="flex align-items-center gap-2">
-      <a href="/">
-        <img src={Logo} alt="Logo" className="w-7 p-0 m-0" />
+    <div>
+      <a href="/" className="flex no-underline align-items-center text-center gap-2">
+        <img src={Logo} alt="Logo" className="w-5 p-0 m-0" />
+        <p className="text-900 font-semibold text-2xl">X</p>
+        <img src={tossagunsLogo} alt="Logo" className="w-5 p-0 m-0" />
       </a>
     </div>
   );
@@ -256,16 +259,20 @@ function Appbar() {
 
   const customHeader3 = (
     <div className="flex align-items-center gap-2">
-      <a href="/">
-        <img src={Logo} alt="Logo" className="w-7 p-0 m-0" />
+      <a href="/" className="flex no-underline align-items-center text-center gap-2">
+        <img src={Logo} alt="Logo" className="w-5 p-0 m-0" />
+        <p className="text-900 font-semibold text-2xl">X</p>
+        <img src={tossagunsLogo} alt="Logo" className="w-5 p-0 m-0" />
       </a>
     </div>
   );
 
   const customHeader4 = (
     <div className="flex align-items-center gap-2">
-      <a href="/">
-        <img src={Logo} alt="Logo" className="w-7 p-0 m-0" />
+      <a href="/" className="flex no-underline align-items-center text-center gap-2">
+        <img src={Logo} alt="Logo" className="w-5 p-0 m-0" />
+        <p className="text-900 font-semibold text-2xl">X</p>
+        <img src={tossagunsLogo} alt="Logo" className="w-5 p-0 m-0" />
       </a>
     </div>
   );
@@ -366,8 +373,12 @@ function Appbar() {
                   text
                 />
               </div>
-              <Link to="/">
-                <img src={Logo} alt="Logo" height={80} />
+              <Link to="/" className="no-underline">
+                <div className="flex  gap-3 align-items-center">
+                  <img src={Logo} alt="Logo" height={100} />
+                  <p className="text-white font-semibold text-2xl">X</p>
+                  <img src={tossagunsLogo} alt="Logo" height={100} />
+                </div>
               </Link>
             </div>
             <div className="w-5 mx-4">
@@ -532,15 +543,17 @@ function Appbar() {
                           </div> */}
                           <div className="w-full">
                             <h3 className="m-0 mt-1 mb-2 p-0 font-semibold text-center">{user.name}</h3>
-                            <div className="w-full flex justify-content-between px-3 align-items-center ">
-                              <div className="flex flex-column justify-content-center align-items-center pr-4 border-right-1 border-white">
+                            {/* <div className="w-full flex justify-content-between px-3 align-items-center ">
+                            <div className="flex flex-column justify-content-center align-items-center pr-4 border-right-1 border-white"> */}
+                            <div className="w-full flex justify-content-center px-3 align-items-center ">
+                              <div className="flex flex-column justify-content-center align-items-center">
                                 <div className="flex align-items-center justify-content-center">
                                   <i className="pi pi-wallet" style={{ fontSize: '1.3rem' }}></i>
                                   <h3 className="m-0 ml-2 p-0 text-2xl font-semibold text-center">฿{Number(user.coop_coupon).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                                 </div>
                                 <p className="m-0 text-center">ยอดเงินคงเหลือ</p>
                               </div>
-                              <div className="flex flex-column justify-content-center align-items-center cursor-pointer" onClick={() => setTopupVisible(true)}>
+                              {/* <div className="flex flex-column justify-content-center align-items-center cursor-pointer" onClick={() => setTopupVisible(true)}>
                                 <div className="text-center">
                                   <svg fill="#ffffff" width="1.6rem" height="1.6rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4,5A1,1,0,0,0,5,6H21a1,1,0,0,1,1,1V21a1,1,0,0,1-1,1H16a1,1,0,0,1,0-2h4V8H5a2.966,2.966,0,0,1-1-.184V19a1,1,0,0,0,1,1h5a1,1,0,0,0,1-1V14.414L9.707,15.707a1,1,0,0,1-1.414-1.414l3-3a.99.99,0,0,1,.326-.217,1,1,0,0,1,.764,0,.99.99,0,0,1,.326.217l3,3a1,1,0,0,1-1.414,1.414L13,14.414V19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H21a1,1,0,0,1,0,2H5A1,1,0,0,0,4,5Z" /></svg>
                                 </div>
@@ -550,17 +563,17 @@ function Appbar() {
                                 visible={isTopupVisible}
                                 setVisible={setTopupVisible}
                                 user={user}
-                              />
+                              /> */}
                             </div>
                             <div className="flex justify-content-end align-items-center mt-2 cursor-pointer" onClick={() => setTopupHistoryVisible(true)}>
                               <p className="m-0">ประวัติการทำรายการ</p>
                               <i className="pi pi-angle-right"></i>
                             </div>
                             <TopupHistory
-                                visible={isTopupHistoryVisible}
-                                setVisible={setTopupHistoryVisible}
-                                user={user}
-                              />
+                              visible={isTopupHistoryVisible}
+                              setVisible={setTopupHistoryVisible}
+                              user={user}
+                            />
                           </div>
                         </div>
 
@@ -765,6 +778,7 @@ function Appbar() {
                                         width={100}
                                         height={100}
                                         className="border-1 border-round-lg surface-border"
+                                        onError={(e) => { e.target.src = img_placeholder; }}
                                       />
                                     </div>
                                     <div className="w-full h-full ml-3 flex flex-column justify-content-between white-space-nowrap overflow-hidden text-overflow-ellipsis">

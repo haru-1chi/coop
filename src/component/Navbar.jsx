@@ -3,7 +3,7 @@ import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
-import Logo from "../assets/tossaganLogo.png";
+import Logo from "../assets/coopLogo.png";
 import CategoriesIcon from "./CategoriesIcon";
 import axios from "axios";
 

@@ -7,7 +7,7 @@ import { Image } from 'primereact/image';
 import { useCart } from '../../router/CartContext';
 import { useNavigate } from "react-router-dom";
 import { ProgressSpinner } from 'primereact/progressspinner';
-import Logo from '../../assets/tossaganLogo.png';
+import Logo from '../../assets/coopLogo.png';
 import KBANK from '../../assets/KPULS1_0_0.png';
 
 const EXPIRE_TIME = 60;
@@ -158,11 +158,11 @@ function QRPage() {
                         )
                     );
 
-                const groupedDeliveries = deliveryToPurchase.reduce((acc, delivery) => {
-                    const existingProduct = acc.find(item => item.product_id === delivery.product_id);
-
-                    if (existingProduct) {
-                        existingProduct.packages.push({
+                    const groupedDeliveries = deliveryToPurchase.reduce((acc, delivery) => {
+                        const existingProduct = acc.find(item => item.product_id === delivery.product_id);
+                    
+                        // Handle duplication based on the amount
+                        const duplicatedPackages = Array.from({ length: delivery.amount }, () => ({
                             package_qty: delivery.package_qty,
                             package_weight: delivery.package_weight,
                             package_width: delivery.package_width,
@@ -171,27 +171,22 @@ function QRPage() {
                             delivery_company: delivery.delivery_company,
                             delivery_price: delivery.delivery_price,
                             delivery_totalprice: delivery.delivery_totalprice,
-                            amount: delivery.amount,
-                        });
-                    } else {
-                        acc.push({
-                            product_id: delivery.product_id,
-                            packages: [{
-                                package_qty: delivery.package_qty,
-                                package_weight: delivery.package_weight,
-                                package_width: delivery.package_width,
-                                package_length: delivery.package_length,
-                                package_height: delivery.package_height,
-                                delivery_company: delivery.delivery_company,
-                                delivery_price: delivery.delivery_price,
-                                delivery_totalprice: delivery.delivery_totalprice,
-                                amount: delivery.amount,
-                            }]
-                        });
-                    }
-
-                    return acc;
-                }, []);
+                            amount: 1, // Each entry represents a single package now
+                        }));
+                    
+                        if (existingProduct) {
+                            // Add each duplicated package to the existing product's packages
+                            existingProduct.packages.push(...duplicatedPackages);
+                        } else {
+                            // Create a new product entry and include all duplicated packages
+                            acc.push({
+                                product_id: delivery.product_id,
+                                packages: duplicatedPackages
+                            });
+                        }
+                    
+                        return acc;
+                    }, []);
 
                 const totaldeliveryPrice = deliveryToPurchase.reduce((total, delivery) => total + delivery.delivery_totalprice, 0);
 

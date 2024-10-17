@@ -95,6 +95,7 @@ function StatusShippingPage({ orderId }) {
                                             width={90}
                                             height={90}
                                             className="border-round-lg border-1 surface-border"
+                                            onError={(e) => { e.target.src = img_placeholder; }}
                                         />
                                         <div className='w-full flex flex-column justify-content-between ml-3 white-space-nowrap overflow-hidden text-overflow-ellipsis'>
                                             <div className="flex flex-column">
@@ -121,30 +122,30 @@ function StatusShippingPage({ orderId }) {
                                                             <p className="m-0 p-0">จัดส่งโดยขนส่ง:</p>
                                                             <p className="m-0 p-0">{packageDetail.delivery_company}</p>
                                                         </div>
-                                                        <div className="flex justify-content-between">
+                                                        {/* <div className="flex justify-content-between">
                                                             <p className="m-0 p-0">น้ำหนัก:</p>
                                                             <p className="m-0 p-0">{packageDetail.package_weight} กรัม</p>
-                                                        </div>
+                                                        </div> */}
                                                         <div className="flex justify-content-between">
                                                             <p className="m-0 p-0">ขนาดบรรจุ:</p>
                                                             <p className="m-0 p-0">{packageDetail.package_qty} ชิ้น</p>
                                                         </div>
-                                                        <div className="flex justify-content-between">
+                                                        {/* <div className="flex justify-content-between">
                                                             <p className="m-0 p-0">ขนาดกล่องพัสดุ:</p>
                                                             <p className="m-0 p-0">กว้าง {packageDetail.package_width} ซม. * ยาว {packageDetail.package_length} ซม. * สูง {packageDetail.package_height} ซม.</p>
-                                                        </div>
+                                                        </div> */}
                                                         <div className="flex justify-content-between">
-                                                            <p className="m-0 p-0">ค่าส่งต่อกล่อง:</p>
+                                                            <p className="m-0 p-0">ค่าส่ง:</p>
                                                             <p className="m-0 p-0 font-semibold">฿{packageDetail.delivery_price}</p>
                                                         </div>
-                                                        <div className="flex justify-content-between">
+                                                        {/* <div className="flex justify-content-between">
                                                             <p className="m-0 p-0">จำนวนพัสดุที่ต้องส่ง:</p>
                                                             <p className="m-0 p-0">{packageDetail.amount} กล่อง</p>
-                                                        </div>
-                                                        <div className="flex justify-content-between">
+                                                        </div> */}
+                                                        {/* <div className="flex justify-content-between">
                                                             <p className="m-0 p-0">รวมค่าส่งทั้งหมด:</p>
                                                             <p className="m-0 p-0 font-semibold">฿{packageDetail.delivery_totalprice}</p>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                 ))}
                                             </>

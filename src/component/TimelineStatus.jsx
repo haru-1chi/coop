@@ -89,7 +89,7 @@ function TimelineStatus({ order, currentStatus, user }) {
     return (
         <div className='bg-section-product flex flex-column border-1 surface-border border-round py-3 px-3 bg-white border-round-mb justify-content-center'>
             <div className='border-round px-3 py-2 bg-primary-400'>
-                <h3 className="m-0 p-0 font-semibold text-900">คำสั่งซื้อของคุณสำเร็จแล้ว</h3>
+                <h3 className="m-0 p-0 font-semibold text-white">คำสั่งซื้อของคุณสำเร็จแล้ว</h3>
             </div>
             <div className="md:flex xl:flex lg:flex">
                 <div className="w-full border-none md:border-right-1 surface-border pl-3 my-3">

@@ -73,7 +73,7 @@ function TopupHistory({ visible, setVisible, user }) {
                                         className={`m-0 mt-2 text-xl font-semibold ${topup.amount * topup.operation_type > 0 ? 'text-green-600' : 'text-red-500'
                                             }`}
                                     >
-                                        {topup.amount * topup.operation_type}฿
+                                        {(topup.amount * topup.operation_type).toLocaleString('en-US')}฿
                                     </p>
                                 </div>
                                 {topup.ref_code !== 'unknown' && <p className="m-0 my-2">เลขที่ออเดอร์: {topup.ref_code}</p>}

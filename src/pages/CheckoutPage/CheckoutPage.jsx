@@ -404,8 +404,8 @@ function CheckoutPage() {
         return distribution;
     };
 
-    const calculateTotalCost = (product_qty) => {
-        const distribution = calculatePackageDistribution(product_qty);
+    const calculateTotalCost = (partner_id, product_id, product_qty) => {
+        const distribution = calculatePackageDistribution(partner_id, product_id, product_qty);
         let totalCost = 0;
 
         distribution.forEach(({ delivery_price, amount }) => {
@@ -571,6 +571,7 @@ function CheckoutPage() {
                                                         width={50}
                                                         height={50}
                                                         className="border-1 border-round-lg surface-border"
+                                                        onError={(e) => { e.target.src = img_placeholder; }}
                                                     />
                                                     <div className="w-full flex flex-column ml-3">
                                                         <span className="mb-1 font-normal">{product.product_name}</span>
